@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>박스 레벨업 GM</title>
+  <style>
+    :root{
+      --bg:#07101b;
+      --bg2:#0b1727;
+      --card:rgba(17,27,44,.94);
+      --card2:rgba(23,37,59,.95);
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#93a4c2;
+      --gold:#f7bf4f;
+      --orange:#ff8a3d;
+      --green:#49d59a;
+      --blue:#6ea6ff;
+      --red:#ff6a80;
+      --purple:#a889ff;
+      --shadow:0 24px 80px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at top, rgba(110,166,255,.18), transparent 25%), radial-gradient(circle at bottom, rgba(255,138,61,.12), transparent 25%), linear-gradient(180deg,var(--bg),#050b13);color:var(--text);font-family:Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:430px;margin:0 auto;min-height:100vh;padding:18px 14px 28px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+    .brand{font-weight:900;font-size:28px;line-height:1;background:linear-gradient(135deg,#fff0c6,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sub{margin-top:6px;color:var(--muted);font-size:12px}
+    .lvl-chip{padding:8px 12px;border-radius:999px;background:rgba(110,166,255,.13);border:1px solid rgba(110,166,255,.25);color:#cfe1ff;font-weight:800;font-size:12px}
+    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;padding:16px;border-radius:26px;background:linear-gradient(135deg, rgba(29,51,95,.96), rgba(14,100,79,.92));border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:14px}
+    .eyebrow{font-size:11px;letter-spacing:1.2px;color:#dce8ff;opacity:.82}
+    .nickname{margin:8px 0 2px;font-size:28px;font-weight:900;border:none;background:transparent;color:#fff;width:100%;padding:0;outline:none}
+    .meta{font-size:13px;color:#d8ffe9;margin-bottom:12px}
+    .xp-row,.small-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#dbe7fb}
+    .xp{height:10px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden;margin-top:8px}
+    .xp>div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:inherit;transition:width .25s ease}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .badge{padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px}
+    .stage{position:relative;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));min-height:240px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+    .glow{position:absolute;left:10%;right:10%;bottom:14px;height:52px;border-radius:50%;background:radial-gradient(circle, rgba(247,191,79,.6), rgba(247,191,79,0));}
+    .character-img{position:relative;z-index:2;width:92%;max-height:228px;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(0,0,0,.22))}
+    .equip-float{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:3}
+    .equip-float span{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.09);font-size:11px}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .tab.active{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(247,191,79,.26)}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;backdrop-filter:blur(8px);box-shadow:0 10px 36px rgba(0,0,0,.14)}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+    .panel-head h3{margin:0;font-size:18px}
+    .hint{font-size:11px;color:var(--muted)}
+    .grid-characters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .char-card{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:10px;color:var(--text);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+    .char-card img{width:72px;height:84px;object-fit:contain}
+    .char-card span{font-size:11px;color:var(--muted)}
+    .char-card.active{border-color:rgba(247,191,79,.45);box-shadow:inset 0 0 0 1px rgba(247,191,79,.16)}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stat{border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04)}
+    .stat.orange{background:rgba(255,138,61,.12)} .stat.gold{background:rgba(247,191,79,.12)} .stat.green{background:rgba(73,213,154,.12)} .stat.blue{background:rgba(110,166,255,.12)} .stat.purple{background:rgba(168,137,255,.12)} .stat.red{background:rgba(255,106,128,.12)}
+    .stat label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
+    .stat strong{font-size:25px}
+    .equip-list,.records,.ranks{display:flex;flex-direction:column;gap:10px}
+    .equip-item,.record,.rank{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--card2);color:var(--text)}
+    .equip-item.active{border-color:rgba(73,213,154,.28);box-shadow:inset 0 0 0 1px rgba(73,213,154,.18)}
+    .equip-main strong,.record strong,.rank strong{display:block;font-size:15px}
+    .equip-main p,.record p,.rank p{margin:4px 0 0;color:var(--muted);font-size:13px}
+    .slot{display:inline-block;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px;color:#dce8ff;margin-left:8px}
+    .state{min-width:64px;text-align:center;font-weight:800;color:#d4ffe8}
+    .form{display:grid;gap:10px}
+    .form.compact{grid-template-columns:1fr 1fr auto}
+    input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);color:var(--text);outline:none}
+    input::placeholder{color:#8fa2c4}
+    .primary,.secondary,.ghost{border:none;padding:13px 14px;border-radius:14px;font-weight:800}
+    .primary{background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200}
+    .secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text)}
+    .ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+    .code-help,.help{font-size:12px;color:var(--muted);margin-top:10px}
+    .record-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-size:12px}
+    .pill{display:inline-flex;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px}
+    .pill.ok{background:rgba(73,213,154,.16);color:#cffff0}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .mini-grid.three{grid-template-columns:repeat(3,1fr)}
+    .mini{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:6px}
+    .mini span{font-size:19px;font-weight:900}
+    .mini small{color:var(--muted)}
+    .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .rank.me{border-color:rgba(247,191,79,.3)}
+    .rank-left{display:flex;align-items:center;gap:12px}
+    .rank-no{width:36px;height:36px;border-radius:12px;background:rgba(247,191,79,.14);display:grid;place-items:center;font-weight:900;color:#ffe9a8}
+    .rank-score{font-size:20px;font-weight:900}
+    .formula{display:grid;gap:10px;color:#d9e5f8}
+    .formula p{margin:0}
+    .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(120%);background:rgba(8,16,30,.96);border:1px solid rgba(247,191,79,.26);color:#fff;padding:14px 16px;border-radius:16px;min-width:280px;max-width:calc(100vw - 28px);text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.3);transition:transform .25s ease;z-index:10}
+    .toast.show{transform:translateX(-50%) translateY(0)}
+    .hidden{display:none}
+    .small-note{font-size:11px;color:var(--muted)}
+    @media (max-width:380px){.hero{grid-template-columns:1fr}.grid-characters,.stats,.mini-grid.three,.upload-grid,.form.compact{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div>
+        <div class="brand">박스 레벨업 GM</div>
+        <div class="sub">우리 박스 안에서 레벨업하는 크로스핏 RPG</div>
+      </div>
+      <div class="lvl-chip" id="levelChip">LV 1</div>
+    </div>
+
+    <section class="hero">
+      <div>
+        <div class="eyebrow">BOX MEMBER PROFILE</div>
+        <input class="nickname" id="nickname" value="WOD Hunter" />
+        <div class="meta" id="charMeta">시바 · 밸런스 올라운더</div>
+        <div class="xp-row"><span id="xpText">XP 0</span><span id="nextText">다음 레벨까지 180 XP</span></div>
+        <div class="xp"><div id="xpBar"></div></div>
+        <div class="badge-row">
+          <span class="badge" id="verifiedBadge">코치 인증 0회</span>
+          <span class="badge" id="prBadge">PR 0개</span>
+          <span class="badge" id="inbodyBadge">인바디 0회</span>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="glow"></div>
+        <img id="heroCharacter" class="character-img" src="assets/characters/dog.png" alt="dog" />
+        <div class="equip-float" id="equipFloat"></div>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="home">🏠 홈</button>
+      <button class="tab" data-tab="wod">🏋️ WOD</button>
+      <button class="tab" data-tab="inbody">📊 인바디</button>
+      <button class="tab" data-tab="rank">🏆 랭킹</button>
+    </nav>
+
+    <main>
+      <section class="tab-panel" id="panel-home">
+        <div class="panel">
+          <div class="panel-head"><h3>캐릭터 선택</h3><span class="hint">5종 동물 선택형</span></div>
+          <div class="grid-characters" id="characterGrid"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>능력치</h3><span class="hint">인바디 + 장비 자동 반영</span></div>
+          <div class="stats" id="statsGrid"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>장비 인벤토리</h3><span class="hint">착용 / 해제 가능</span></div>
+          <div class="equip-list" id="equipList"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-wod">
+        <div class="panel">
+          <div class="panel-head"><h3>WOD 기록 등록</h3><span class="hint">코치 인증코드 일치 시 인증</span></div>
+          <form class="form" id="wodForm">
+            <input name="name" placeholder="WOD 이름" required />
+            <select name="type">
+              <option>For Time</option><option>AMRAP</option><option>EMOM</option><option>Chipper</option>
+            </select>
+            <input name="score" placeholder="기록 예: 6:35 / 8 Rounds" required />
+            <input name="code" placeholder="코치 인증코드" />
+            <input name="memo" placeholder="메모" />
+            <button class="primary" type="submit">저장하기</button>
+          </form>
+          <div class="code-help">테스트용 인증코드: <code id="codeExample"></code></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>최근 WOD</h3><span class="hint">인증 시 +80 XP / 일반 +30 XP</span></div>
+          <div class="records" id="wodList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>PR 등록</h3><span class="hint">신규 PR 1개당 +100 XP</span></div>
+          <form class="form compact" id="prForm">
+            <input name="event" placeholder="종목 예: Snatch" required />
+            <input name="record" placeholder="기록 예: 75kg" required />
+            <button class="primary" type="submit">PR 저장</button>
+          </form>
+          <div class="mini-grid" id="prList"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-inbody">
+        <div class="panel">
+          <div class="panel-head"><h3>인바디 입력</h3><span class="hint">수동 입력 + CSV 업로드</span></div>
+          <form class="form" id="inbodyForm">
+            <input type="date" name="date" required />
+            <input type="number" name="weight" step="0.1" placeholder="체중 (kg)" required />
+            <input type="number" name="muscle" step="0.1" placeholder="골격근량 (kg)" required />
+            <input type="number" name="fatPercent" step="0.1" placeholder="체지방률 (%)" required />
+            <button class="primary" type="submit">능력치 반영</button>
+          </form>
+          <div class="upload-grid">
+            <label class="secondary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              CSV 업로드
+              <input id="csvUpload" type="file" accept=".csv" style="display:none" />
+            </label>
+            <label class="ghost" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              인바디 사진 업로드 예정
+              <input id="imageUpload" type="file" accept="image/*" style="display:none" />
+            </label>
+          </div>
+          <div class="help">CSV는 headers: <code>date,weight,muscle,fatPercent</code> 형식을 지원해.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>최근 측정값</h3><span class="hint">증감 비교</span></div>
+          <div class="mini-grid three" id="latestInbody"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>인바디 히스토리</h3><span class="hint">최신순 정렬</span></div>
+          <div class="records" id="inbodyList"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-rank">
+        <div class="panel">
+          <div class="panel-head"><h3>박스 랭킹</h3><span class="hint">누적 XP + PR + 인증 가산</span></div>
+          <div class="ranks" id="rankList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>점수 계산식</h3><span class="hint">MVP 기준</span></div>
+          <div class="formula">
+            <p>일반 WOD +30 XP</p>
+            <p>코치 인증 WOD +80 XP</p>
+            <p>신규 PR +100 XP</p>
+            <p>인바디 입력 +20 XP</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'box-rpg-gm-v2';
+const COACH_CODES = ['COACH-KIM-2026','BOX-RX-MASTER','WOD-VERIFY-777'];
+const CHARACTERS = [
+  {id:'dog', name:'시바', title:'밸런스 올라운더', image:'assets/characters/dog.png'},
+  {id:'cat', name:'캘리코', title:'민첩한 테크니션', image:'assets/characters/cat.png'},
+  {id:'panda', name:'판더', title:'헤비 리프터', image:'assets/characters/panda.png'},
+  {id:'hamster', name:'햄찌', title:'꾸준한 성장형', image:'assets/characters/hamster.png'},
+  {id:'rabbit', name:'래빗', title:'스피드 러너', image:'assets/characters/rabbit.png'},
+];
+const EQUIPMENT = [
+  {id:'headband', slot:'머리', name:'헤드밴드', bonus:{agi:2}, unlock:'WOD 3회', unlockedBy:s => s.wods.length >= 3},
+  {id:'wrist', slot:'손목', name:'손목 보호대', bonus:{vit:2}, unlock:'코치 인증 1회', unlockedBy:s => s.wods.filter(w=>w.verified).length >= 1},
+  {id:'grips', slot:'손', name:'체조 그립', bonus:{agi:3}, unlock:'WOD 5회', unlockedBy:s => s.wods.length >= 5},
+  {id:'belt', slot:'허리', name:'리프팅 벨트', bonus:{str:4}, unlock:'PR 1회', unlockedBy:s => s.prs.length >= 1},
+  {id:'knee', slot:'다리', name:'무릎 보호대', bonus:{end:3}, unlock:'레벨 3', unlockedBy:s => levelFromXp(calcXp(s)) >= 3},
+  {id:'shoes', slot:'신발', name:'역도화', bonus:{str:2, vit:1}, unlock:'WOD 8회', unlockedBy:s => s.wods.length >= 8},
+  {id:'vest', slot:'특수', name:'중량조끼', bonus:{end:4}, unlock:'코치 인증 3회', unlockedBy:s => s.wods.filter(w=>w.verified).length >= 3},
+];
+
+const initialState = {
+  nickname:'WOD Hunter',
+  selectedCharacter:'dog',
+  equipped:{},
+  wods:[
+    {id:1,name:'Fran',type:'For Time',score:'5:42',memo:'숨 턱끝까지',verified:true,xp:80,date:'2026-03-15'},
+    {id:2,name:'DT',type:'For Time',score:'7:55',memo:'후반 버티기',verified:false,xp:30,date:'2026-03-18'}
+  ],
+  prs:[
+    {event:'Clean',record:'95kg',date:'2026-03-15'},
+    {event:'Front Squat',record:'130kg',date:'2026-03-10'}
+  ],
+  inbodyRecords:[
+    {date:'2026-03-01',weight:72,muscle:37.4,fatPercent:12},
+    {date:'2026-03-23',weight:72,muscle:37.4,fatPercent:12}
+  ]
+};
+
+const state = loadState();
+
+function loadState(){
+  try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(saved) return {...initialState, ...saved};}catch(e){}
+  return structuredClone(initialState);
+}
+function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function showToast(message){
+  const t = document.getElementById('toast');
+  t.textContent = message; t.classList.add('show');
+  clearTimeout(showToast._timer); showToast._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function calcXp(s=state){ return s.wods.reduce((a,b)=>a+b.xp,0) + s.prs.length * 100 + s.inbodyRecords.length * 20; }
+function levelFromXp(xp){ return Math.floor(xp / 180) + 1; }
+function latestInbody(){ return [...state.inbodyRecords].sort((a,b)=>a.date.localeCompare(b.date)).at(-1); }
+function prevInbody(){ const sorted=[...state.inbodyRecords].sort((a,b)=>a.date.localeCompare(b.date)); return sorted.length > 1 ? sorted.at(-2) : null; }
+function calcBaseStats(){
+  const ib = latestInbody() || {weight:70,muscle:30,fatPercent:20};
+  const wodCount = state.wods.length;
+  const verified = state.wods.filter(w=>w.verified).length;
+  return {
+    str: Math.max(1, Math.round(ib.muscle * 1.8)),
+    vit: Math.max(1, Math.round((ib.weight * .45) + (ib.muscle * .9))),
+    end: Math.max(1, Math.round((100 - ib.fatPercent) * .45 + wodCount * 1.1)),
+    agi: Math.max(1, Math.round((100 - ib.fatPercent) * .7 + Math.min(wodCount, 20))),
+    men: Math.max(1, 10 + verified * 6 + Math.floor(wodCount / 2))
+  };
+}
+function calcEquipmentBonus(){
+  const bonus={str:0,vit:0,end:0,agi:0,men:0};
+  Object.values(state.equipped).forEach(itemId => {
+    const item = EQUIPMENT.find(v => v.id === itemId);
+    if(!item) return;
+    Object.entries(item.bonus).forEach(([k,v]) => bonus[k] += v);
+  });
+  return bonus;
+}
+function calcStats(){
+  const base = calcBaseStats();
+  const eq = calcEquipmentBonus();
+  return {
+    str: base.str + eq.str,
+    vit: base.vit + eq.vit,
+    end: base.end + eq.end,
+    agi: base.agi + eq.agi,
+    men: base.men + eq.men,
+    power: base.str + base.vit + base.end + base.agi + base.men + eq.str + eq.vit + eq.end + eq.agi + eq.men,
+  }
+}
+function selectedCharacter(){ return CHARACTERS.find(v => v.id === state.selectedCharacter) || CHARACTERS[0]; }
+function formatBonus(bonus){ return Object.entries(bonus).map(([k,v]) => `${k.toUpperCase()} +${v}`).join(' · '); }
+function diff(current, previous, key){ if(!current || !previous) return '첫 기록'; const d = +(current[key] - previous[key]).toFixed(1); return `${d > 0 ? '+' : ''}${d}${key === 'fatPercent' ? '%' : 'kg'}`; }
+function canEquip(item){ return item.unlockedBy(state); }
+function toggleEquip(itemId){
+  const item = EQUIPMENT.find(v => v.id === itemId); if(!item) return;
+  if(!canEquip(item)){ showToast(`아직 잠금 상태야 · ${item.unlock}`); return; }
+  if(state.equipped[item.slot] === item.id){ delete state.equipped[item.slot]; showToast(`${item.name} 해제!`); }
+  else { state.equipped[item.slot] = item.id; showToast(`${item.name} 장착!`); }
+  persist(); render();
+}
+
+function renderHeader(){
+  const xp = calcXp();
+  const level = levelFromXp(xp);
+  const currentLevelXp = xp % 180;
+  document.getElementById('levelChip').textContent = `LV ${level}`;
+  document.getElementById('xpText').textContent = `XP ${xp}`;
+  document.getElementById('nextText').textContent = `다음 레벨까지 ${180 - currentLevelXp || 180} XP`;
+  document.getElementById('xpBar').style.width = `${currentLevelXp / 180 * 100}%`;
+  document.getElementById('verifiedBadge').textContent = `코치 인증 ${state.wods.filter(v=>v.verified).length}회`;
+  document.getElementById('prBadge').textContent = `PR ${state.prs.length}개`;
+  document.getElementById('inbodyBadge').textContent = `인바디 ${state.inbodyRecords.length}회`;
+}
+
+function renderHero(){
+  const c = selectedCharacter();
+  document.getElementById('nickname').value = state.nickname;
+  document.getElementById('charMeta').textContent = `${c.name} · ${c.title}`;
+  const img = document.getElementById('heroCharacter'); img.src = c.image; img.alt = c.name;
+  const float = document.getElementById('equipFloat');
+  float.innerHTML = Object.values(state.equipped).map(id => EQUIPMENT.find(v => v.id === id)).filter(Boolean).slice(0,4).map(item => `<span>${item.name}</span>`).join('') || '<span>장비 없음</span>';
+}
+
+function renderCharacters(){
+  const container = document.getElementById('characterGrid');
+  container.innerHTML = CHARACTERS.map(c => `
+    <button class="char-card ${state.selectedCharacter === c.id ? 'active' : ''}" data-character="${c.id}">
+      <img src="${c.image}" alt="${c.name}" />
+      <strong>${c.name}</strong>
+      <span>${c.title}</span>
+    </button>`).join('');
+  container.querySelectorAll('[data-character]').forEach(btn => btn.onclick = () => { state.selectedCharacter = btn.dataset.character; persist(); render(); });
+}
+
+function renderStats(){
+  const stats = calcStats();
+  const defs = [
+    ['STR', stats.str, 'orange'],['VIT', stats.vit, 'gold'],['END', stats.end, 'green'],['AGI', stats.agi, 'blue'],['MEN', stats.men, 'purple'],['POWER', stats.power, 'red']
+  ];
+  document.getElementById('statsGrid').innerHTML = defs.map(([label,val,accent]) => `<div class="stat ${accent}"><label>${label}</label><strong>${val}</strong></div>`).join('');
+}
+
+function renderEquipment(){
+  const list = document.getElementById('equipList');
+  list.innerHTML = EQUIPMENT.map(item => {
+    const active = state.equipped[item.slot] === item.id;
+    const unlocked = canEquip(item);
+    return `
+      <button class="equip-item ${active ? 'active' : ''}" data-equip="${item.id}">
+        <div class="equip-main">
+          <strong>${item.name}<span class="slot">${item.slot}</span></strong>
+          <p>${formatBonus(item.bonus)}</p>
+          <p class="small-note">${unlocked ? '언락 완료' : '언락 조건: ' + item.unlock}</p>
+        </div>
+        <div class="state">${active ? '장착중' : (unlocked ? '장착' : '잠김')}</div>
+      </button>`;
+  }).join('');
+  list.querySelectorAll('[data-equip]').forEach(btn => btn.onclick = () => toggleEquip(btn.dataset.equip));
+}
+
+function renderWods(){
+  const list = document.getElementById('wodList');
+  const items = [...state.wods].sort((a,b)=>b.date.localeCompare(a.date));
+  if(!items.length){ list.innerHTML = '<div class="record"><div><strong>아직 기록 없음</strong><p>첫 WOD를 저장해봐.</p></div></div>'; return; }
+  list.innerHTML = items.map(item => `
+    <div class="record">
+      <div>
+        <strong>${item.name}</strong>
+        <p>${item.type} · ${item.score}${item.memo ? ' · ' + item.memo : ''}</p>
+        <p>${item.date}</p>
+      </div>
+      <div class="record-meta">
+        <span class="pill ${item.verified ? 'ok' : ''}">${item.verified ? '코치 인증' : '일반 기록'}</span>
+        <span>+${item.xp} XP</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderPrs(){
+  const list = document.getElementById('prList');
+  if(!state.prs.length){ list.innerHTML = '<div class="mini"><strong>PR이 아직 없어</strong><small>등록하면 경험치가 크게 올라가.</small></div>'; return; }
+  list.innerHTML = [...state.prs].reverse().map(item => `<div class="mini"><strong>${item.event}</strong><span>${item.record}</span><small>${item.date}</small></div>`).join('');
+}
+
+function renderInbody(){
+  const current = latestInbody();
+  const previous = prevInbody();
+  const latestBox = document.getElementById('latestInbody');
+  if(!current){ latestBox.innerHTML = '<div class="mini"><strong>인바디 기록 없음</strong><small>측정값을 입력하면 능력치가 계산돼.</small></div>'; }
+  else {
+    latestBox.innerHTML = `
+      <div class="mini"><strong>체중</strong><span>${current.weight}kg</span><small>${diff(current, previous, 'weight')}</small></div>
+      <div class="mini"><strong>골격근량</strong><span>${current.muscle}kg</span><small>${diff(current, previous, 'muscle')}</small></div>
+      <div class="mini"><strong>체지방률</strong><span>${current.fatPercent}%</span><small>${diff(current, previous, 'fatPercent')}</small></div>`;
+  }
+  const list = document.getElementById('inbodyList');
+  list.innerHTML = [...state.inbodyRecords].sort((a,b)=>b.date.localeCompare(a.date)).map(row => `
+    <div class="record">
+      <div><strong>${row.date}</strong><p>${row.weight}kg · 근육 ${row.muscle}kg · 지방 ${row.fatPercent}%</p></div>
+      <div class="record-meta"><span class="pill ok">스탯 반영</span></div>
+    </div>`).join('');
+}
+
+function calcRankingScore(me=false){
+  const xp = calcXp();
+  return me ? xp : 0;
+}
+function renderRanking(){
+  const meScore = calcRankingScore(true);
+  const rivals = [
+    {name:'RX Tiger', score:1560, badge:'1위권'},
+    {name:'Burpee Fox', score:1380, badge:'라이벌'},
+    {name:'AMRAP Bear', score:1240, badge:'꾸준형'},
+  ];
+  const all = [{name: state.nickname || '네 캐릭터', score: meScore, badge:'상승중', me:true}, ...rivals].sort((a,b)=>b.score-a.score);
+  document.getElementById('rankList').innerHTML = all.map((u,idx)=>`<div class="rank ${u.me ? 'me' : ''}"><div class="rank-left"><div class="rank-no">${idx+1}</div><div><strong>${u.name}</strong><p>${u.badge}</p></div></div><div class="rank-score">${u.score}</div></div>`).join('');
+}
+
+function render(){
+  renderHeader(); renderHero(); renderCharacters(); renderStats(); renderEquipment(); renderWods(); renderPrs(); renderInbody(); renderRanking();
+  document.getElementById('codeExample').textContent = COACH_CODES[0];
+}
+
+function wireEvents(){
+  document.querySelectorAll('.tab').forEach(btn => btn.onclick = () => {
+    document.querySelectorAll('.tab').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(v => v.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById(`panel-${btn.dataset.tab}`).classList.remove('hidden');
+  });
+  document.getElementById('nickname').addEventListener('change', e => { state.nickname = e.target.value.trim() || 'WOD Hunter'; persist(); render(); });
+  document.getElementById('wodForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const code = String(form.get('code') || '').trim();
+    const verified = code && COACH_CODES.includes(code);
+    const invalidAttempt = code && !verified;
+    state.wods.push({
+      id: Date.now(),
+      name: String(form.get('name')).trim(),
+      type: String(form.get('type')),
+      score: String(form.get('score')).trim(),
+      memo: String(form.get('memo') || '').trim(),
+      verified,
+      xp: verified ? 80 : 30,
+      date: new Date().toISOString().slice(0,10)
+    });
+    e.currentTarget.reset();
+    persist(); render();
+    showToast(verified ? '코치 인증 완료! +80 XP' : invalidAttempt ? '코드 불일치 · 일반 기록으로 저장! +30 XP' : '일반 기록 저장! +30 XP');
+  });
+  document.getElementById('prForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    state.prs.push({ event:String(form.get('event')).trim(), record:String(form.get('record')).trim(), date:new Date().toISOString().slice(0,10) });
+    e.currentTarget.reset();
+    persist(); render(); showToast('신규 PR 등록! +100 XP');
+  });
+  document.getElementById('inbodyForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    state.inbodyRecords.push({
+      date:String(form.get('date')),
+      weight:Number(form.get('weight')),
+      muscle:Number(form.get('muscle')),
+      fatPercent:Number(form.get('fatPercent')),
+    });
+    state.inbodyRecords.sort((a,b)=>a.date.localeCompare(b.date));
+    persist(); render(); showToast('인바디가 반영되어 능력치가 업데이트됐어!');
+  });
+  document.getElementById('csvUpload').addEventListener('change', async e => {
+    const file = e.target.files?.[0]; if(!file) return;
+    const text = await file.text();
+    const rows = text.trim().split(/\r?\n/).map(v => v.split(',').map(s => s.trim()));
+    const headers = rows.shift().map(v => v.toLowerCase());
+    const idx = {date: headers.indexOf('date'), weight: headers.indexOf('weight'), muscle: headers.indexOf('muscle'), fatPercent: headers.indexOf('fatpercent')};
+    if(Object.values(idx).some(v => v < 0)){ showToast('CSV 헤더를 확인해줘: date,weight,muscle,fatPercent'); e.target.value = ''; return; }
+    rows.forEach(r => {
+      state.inbodyRecords.push({date:r[idx.date], weight:Number(r[idx.weight]), muscle:Number(r[idx.muscle]), fatPercent:Number(r[idx.fatPercent])});
+    });
+    state.inbodyRecords.sort((a,b)=>a.date.localeCompare(b.date));
+    persist(); render(); e.target.value = ''; showToast('CSV 업로드 완료!');
+  });
+  document.getElementById('imageUpload').addEventListener('change', e => {
+    if(e.target.files?.[0]) showToast('사진 업로드 UI만 준비되어 있어. OCR은 다음 버전에 연결 가능!');
+    e.target.value = '';
+  });
+}
+
+render(); wireEvents();
+
+autoUnlockStarterGear();
+function autoUnlockStarterGear(){
+  if(state.prs.length >= 1 && !state.equipped['허리']) state.equipped['허리'] = 'belt';
+  if(state.wods.length >= 5 && !state.equipped['손']) state.equipped['손'] = 'grips';
+  if(state.wods.length >= 8 && !state.equipped['신발']) state.equipped['신발'] = 'shoes';
+  persist(); render();
+}
+</script>
+</body>
+</html>
