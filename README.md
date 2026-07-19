@@ -3,7 +3,8 @@
 크로스핏 동작으로 이루어진 링피트 어드벤처 스타일 리듬게임 정적 웹앱입니다.
 
 ## 포함 기능
-- 관절 기반 옆모습 SVG 캐릭터가 실제 동작 자세(짐네스틱 4종 + 역도 12종, 총 16개 동작)를 박자에 맞춰 수행
+- 스쿼트·버피·박스점프·스내치·데드리프트 5개 동작은 **Three.js 3D 리깅 캐릭터**(관절 회전 + 다리 IK)로,
+  나머지 11개 동작은 관절 기반 옆모습 SVG 캐릭터로 실제 동작 자세를 박자에 맞춰 수행(듀얼 렌더러)
 - 월드맵 진행 구조 — 짐네스틱 월드 / 역도 월드, 스테이지를 클리어해야 다음 칸이 열림
 - 적 배틀 연출 — PERFECT/GOOD 판정마다 적 캐릭터에게 데미지
 - 개별 동작 스테이지 + WOD 조합 보스전(프란/그레이스/머프/DT 스타일)
@@ -29,3 +30,7 @@
 1. GitHub 저장소를 Vercel에 Import
 2. Framework Preset은 Other / Static으로 두고 배포
 3. 별도 환경변수 없이 동작
+
+## 3D 애셋 출처 및 라이선스
+- `assets/vendor/three/`: [Three.js](https://github.com/mrdoob/three.js) r160, MIT 라이선스(`assets/vendor/three/LICENSE` 참고). npm 패키지에서 추출해 자체 호스팅.
+- `assets/models/soldier.glb`: Three.js 공식 예제 저장소(`examples/models/gltf/Soldier.glb`, Mixamo 원본, 공식 애니메이션 데모용으로 정식 번들됨)에서 받아온 리깅 캐릭터. 동작(관절 애니메이션) 자체는 이 프로젝트에서 직접 제작.
