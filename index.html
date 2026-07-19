@@ -48,6 +48,39 @@
   .stars{color:var(--gold);font-size:12px;letter-spacing:1px}
   .best{font-size:11px;color:var(--green);margin-top:2px}
   .play-btn{border:none;border-radius:14px;padding:12px 16px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200;flex-shrink:0}
+  .play-btn:disabled{opacity:.4}
+
+  /* ---- world map ---- */
+  .world-map{display:flex;flex-direction:column;gap:4px}
+  .world-header{font-size:12px;font-weight:900;letter-spacing:.5px;margin:14px 0 8px;padding:4px 10px;border-radius:999px;display:inline-block;color:#10151f}
+  .world-header:first-child{margin-top:0}
+  .map-path{position:relative;display:flex;flex-direction:column;gap:0}
+  .map-node{display:flex;align-items:center;gap:12px;padding:10px 4px;position:relative}
+  .map-node.right{flex-direction:row-reverse;text-align:right}
+  .map-node::before{content:'';position:absolute;left:50%;top:-14px;width:2px;height:14px;background:rgba(255,255,255,.14)}
+  .map-node:first-child::before{display:none}
+  .node-dot{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid rgba(255,255,255,.14);background:var(--card2);position:relative}
+  .node-dot.boss{width:66px;height:66px;font-size:32px;border-color:rgba(247,191,79,.5);box-shadow:0 0 0 4px rgba(247,191,79,.1)}
+  .node-dot.locked{filter:grayscale(1);opacity:.35}
+  .node-dot.cleared::after{content:'✓';position:absolute;right:-2px;bottom:-2px;background:var(--green);color:#06281c;width:20px;height:20px;border-radius:50%;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+  .node-info{flex:1;min-width:0}
+  .node-info strong{display:block;font-size:13px}
+  .node-info p{margin:2px 0 0;color:var(--muted);font-size:11px}
+  .map-node.locked .node-info{opacity:.4}
+  .map-node button{border:none;border-radius:12px;padding:8px 12px;font-weight:800;font-size:12px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200;flex-shrink:0}
+  .map-node button:disabled{background:rgba(255,255,255,.08);color:var(--muted)}
+
+  /* ---- enemy battle ---- */
+  .enemy-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:rgba(255,80,80,.06);border:1px solid rgba(255,106,128,.18);margin-bottom:10px}
+  .enemy-sprite{font-size:30px;transition:transform .12s ease}
+  .enemy-sprite.hit{animation:enemyShake .28s ease}
+  @keyframes enemyShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) scale(.94)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+  .enemy-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .enemy-info span{font-size:12px;font-weight:800;color:#ffd7dd}
+  .enemy-hp{height:7px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .enemy-hp>div{height:100%;width:100%;background:linear-gradient(90deg,var(--red),#ff9a6a);border-radius:inherit;transition:width .2s ease}
+  .enemy-hit-pop{position:absolute;left:0;right:0;top:14px;text-align:center;font-size:16px;font-weight:900;color:var(--red);opacity:0;pointer-events:none;transition:opacity .12s ease, transform .12s ease;transform:translateY(0) scale(1)}
+  .enemy-hit-pop.show{opacity:1;transform:translateY(-8px) scale(1.1)}
 
   /* ---- play ---- */
   .hud{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
@@ -115,14 +148,14 @@
       <div class="panel-head"><h3>플레이 방법</h3><span class="hint">탭 타이밍</span></div>
       <div class="how">
         <p>캐릭터가 박자에 맞춰 실제 동작 자세로 반복 수행해. <b>가장 낮은 자세(바닥)에 닿는 순간</b> 화면을 탭하거나 스페이스바를 눌러줘.</p>
-        <p>WOD는 여러 동작을 이어붙인 구성이라, <b>한 번에 한 동작씩</b> 순서대로 등장해.</p>
+        <p>정확하게 칠 때마다 적에게 데미지를 줘! 스테이지를 클리어하면 지도의 다음 칸이 열려.</p>
       </div>
       <div class="legend" id="legend"></div>
     </div>
 
     <div class="panel">
-      <div class="panel-head"><h3>WOD 트랙 선택</h3><span class="hint">난이도 순</span></div>
-      <div class="song-list" id="songList"></div>
+      <div class="panel-head"><h3>모험 지도</h3><span class="hint">클리어하면 다음 스테이지가 열려</span></div>
+      <div class="world-map" id="worldMap"></div>
     </div>
   </section>
 
@@ -146,10 +179,19 @@
       <div class="rep-count" id="repCount">0/0</div>
     </div>
 
+    <div class="enemy-row" id="enemyRow">
+      <div class="enemy-sprite" id="enemySprite">🐉</div>
+      <div class="enemy-info">
+        <span id="enemyName">적</span>
+        <div class="enemy-hp"><div id="enemyHpFill"></div></div>
+      </div>
+    </div>
+
     <div class="game-stage" id="gameStage">
       <div class="stage-flash" id="stageFlash"></div>
       <div class="combo-big hidden" id="comboBig"></div>
       <div class="judge-pop" id="judgePop"></div>
+      <div class="enemy-hit-pop" id="enemyHitPop"></div>
       <svg class="char-svg" id="charSvg" viewBox="0 24 280 322" preserveAspectRatio="xMidYMid meet">
         <defs>
           <!-- gradientUnits="userSpaceOnUse"로 고정: 캐릭터 각 부위가 회전/수평/수직이 되어도
@@ -174,6 +216,10 @@
             <stop offset="0%" stop-color="#4a5674"/>
             <stop offset="100%" stop-color="#232c40"/>
           </linearGradient>
+          <linearGradient id="gradBar" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="230" y2="340">
+            <stop offset="0%" stop-color="#c7cedd"/>
+            <stop offset="100%" stop-color="#7a8296"/>
+          </linearGradient>
         </defs>
         <ellipse id="groundShadow" cx="150" cy="326" rx="52" ry="10" fill="rgba(0,0,0,.4)"/>
         <rect id="boxPlatform" x="96" y="280" width="108" height="60" rx="8" fill="url(#gradBox)" stroke="rgba(255,255,255,.12)" opacity="0"/>
@@ -189,6 +235,9 @@
           <ellipse id="legFrontShoe" rx="17" ry="9" fill="url(#gradShoe)"/>
           <circle id="headCircle" r="24" fill="url(#gradSkin)"/>
           <circle id="headShine" r="6" fill="rgba(255,255,255,.4)"/>
+          <line id="barbellBar" stroke="url(#gradBar)" stroke-width="7" opacity="0"/>
+          <circle id="barbellPlateA" r="15" fill="url(#gradBar)" opacity="0"/>
+          <circle id="barbellPlateB" r="15" fill="url(#gradBar)" opacity="0"/>
           <line id="armFrontUpper" stroke="url(#gradShirt)" stroke-width="16"/>
           <line id="armFrontFore" stroke="url(#gradSkin)" stroke-width="14"/>
         </g>
@@ -234,13 +283,21 @@ const MOVES = {
   burpee:  { name:'버피',     emoji:'🔥', color0:'#ffab6b', color1:'#c85a1f' },
   boxjump: { name:'박스점프', emoji:'⬆️', color0:'#6be0ac', color1:'#1f9d6b' },
   snatch:  { name:'스내치',   emoji:'🏋️', color0:'#ffd685', color1:'#d69420' },
+  lunge:        { name:'런지',           emoji:'🚶', color0:'#8fbaff', color1:'#3a6bd4' },
+  deadlift:     { name:'데드리프트',     emoji:'🏋️', color0:'#ff9e9e', color1:'#d1495b' },
+  frontSquat:   { name:'프론트 스쿼트', emoji:'🦵', color0:'#6be0ac', color1:'#1f9d6b' },
+  backSquat:    { name:'백 스쿼트',     emoji:'🦵', color0:'#9fe6c8', color1:'#2c8f6a' },
+  ohp:          { name:'오버헤드 프레스', emoji:'💪', color0:'#ffd685', color1:'#d69420' },
+  pushPress:    { name:'푸시 프레스',   emoji:'💪', color0:'#ffc46b', color1:'#c9791a' },
+  powerClean:   { name:'파워 클린',     emoji:'⚡', color0:'#c7a8ff', color1:'#7c4fd6' },
+  powerSnatchBB:{ name:'파워 스내치',   emoji:'⚡', color0:'#a889ff', color1:'#6a3fc0' },
+  thruster:     { name:'스러스터',       emoji:'🔥', color0:'#ff9e6b', color1:'#c85a1f' },
+  hangClean:    { name:'행 클린',       emoji:'⚡', color0:'#b6a1ff', color1:'#6c4fd0' },
+  hangSnatch:   { name:'행 스내치',     emoji:'⚡', color0:'#9be3ff', color1:'#3f9fd6' },
+  pushJerk:     { name:'푸시 저크',     emoji:'💥', color0:'#ff8fa8', color1:'#d1416a' },
 };
 
 const WODS = [
-  {
-    id:'squat-basics', name:'스쿼트 베이직', bpm:100, stars:1,
-    stations:[ {move:'squat', reps:30} ]
-  },
   {
     id:'fran-style', name:'프란 스타일 12-9-6', bpm:126, stars:2,
     stations:[
@@ -264,7 +321,59 @@ const WODS = [
       {move:'squat',reps:7},  {move:'burpee',reps:7},  {move:'boxjump',reps:7},  {move:'snatch',reps:7},
     ]
   },
+  {
+    id:'dt-style', name:'DT 스타일', bpm:130, stars:4,
+    stations:[
+      {move:'deadlift',reps:12}, {move:'hangClean',reps:9}, {move:'pushJerk',reps:6},
+      {move:'deadlift',reps:12}, {move:'hangClean',reps:9}, {move:'pushJerk',reps:6},
+    ]
+  },
 ];
+
+/* ============== 월드맵 (링피트 스타일 진행) ============== */
+const WORLDS = [
+  {
+    id:'gymnastics', name:'짐네스틱 월드', accent:'#6ea6ff',
+    nodes:[
+      {type:'stage', id:'st-squat',   move:'squat',   reps:30, bpm:100, stars:1, enemy:{name:'슬라임',   emoji:'🟢'}},
+      {type:'stage', id:'st-burpee',  move:'burpee',  reps:20, bpm:110, stars:2, enemy:{name:'임프',     emoji:'👹'}},
+      {type:'boss',  id:'fran-style',                                   enemy:{name:'프란',     emoji:'🐉'}},
+      {type:'stage', id:'st-boxjump', move:'boxjump', reps:20, bpm:120, stars:2, enemy:{name:'고블린',   emoji:'👺'}},
+      {type:'stage', id:'st-snatch',  move:'snatch',  reps:16, bpm:130, stars:3, enemy:{name:'가고일',   emoji:'🗿'}},
+      {type:'boss',  id:'grace-rush',                                   enemy:{name:'그레이스', emoji:'🐲'}},
+      {type:'boss',  id:'murph-overdrive',                              enemy:{name:'머프',     emoji:'👑'}},
+    ]
+  },
+  {
+    id:'weightlifting', name:'역도 월드', accent:'#f7bf4f',
+    nodes:[
+      {type:'stage', id:'st-lunge',      move:'lunge',        reps:24, bpm:100, stars:1, enemy:{name:'스켈레톤',     emoji:'💀'}},
+      {type:'stage', id:'st-deadlift',   move:'deadlift',     reps:20, bpm:104, stars:1, enemy:{name:'미믹',         emoji:'📦'}},
+      {type:'stage', id:'st-ohp',        move:'ohp',          reps:20, bpm:100, stars:1, enemy:{name:'박쥐',         emoji:'🦇'}},
+      {type:'stage', id:'st-pushpress',  move:'pushPress',    reps:20, bpm:112, stars:2, enemy:{name:'오크',         emoji:'🧌'}},
+      {type:'stage', id:'st-frontsquat', move:'frontSquat',   reps:20, bpm:116, stars:2, enemy:{name:'트롤',         emoji:'🧟'}},
+      {type:'stage', id:'st-backsquat',  move:'backSquat',    reps:20, bpm:116, stars:2, enemy:{name:'미노타우로스', emoji:'🐂'}},
+      {type:'stage', id:'st-hangclean',  move:'hangClean',    reps:18, bpm:126, stars:2, enemy:{name:'하피',         emoji:'🦅'}},
+      {type:'stage', id:'st-hangsnatch', move:'hangSnatch',   reps:18, bpm:130, stars:3, enemy:{name:'와이번',       emoji:'🐍'}},
+      {type:'stage', id:'st-powerclean', move:'powerClean',   reps:16, bpm:136, stars:3, enemy:{name:'키메라',       emoji:'🦁'}},
+      {type:'stage', id:'st-powersnatch',move:'powerSnatchBB',reps:16, bpm:140, stars:3, enemy:{name:'베히모스',     emoji:'🐘'}},
+      {type:'stage', id:'st-thruster',   move:'thruster',     reps:16, bpm:140, stars:3, enemy:{name:'데몬',         emoji:'😈'}},
+      {type:'stage', id:'st-pushjerk',   move:'pushJerk',     reps:14, bpm:144, stars:4, enemy:{name:'리치',         emoji:'☠️'}},
+      {type:'boss',  id:'dt-style',                                                      enemy:{name:'DT',          emoji:'👑'}},
+    ]
+  },
+];
+const FLAT_NODES = WORLDS.flatMap(w => w.nodes.map(n => ({...n, worldId:w.id, worldName:w.name, worldAccent:w.accent})));
+
+function wodForNode(node){
+  if(node.type === 'boss') return WODS.find(w => w.id === node.id);
+  return { id:node.id, name:MOVES[node.move].name, bpm:node.bpm, stars:node.stars, stations:[{move:node.move, reps:node.reps}] };
+}
+function isNodeUnlocked(index){
+  if(index <= 0) return true;
+  return meta.clearedStages.includes(FLAT_NODES[index-1].id);
+}
+function isNodeCleared(id){ return meta.clearedStages.includes(id); }
 
 const PERFECT_WINDOW = 0.07;
 const GOOD_WINDOW = 0.18;
@@ -272,8 +381,11 @@ const MISS_WINDOW = 0.22;
 
 const META_KEY = 'boxbeat-meta-v2';
 function loadMeta(){
-  try{ const s = JSON.parse(localStorage.getItem(META_KEY)); if(s) return s; }catch(e){}
-  return { totalXp:0, best:{} };
+  try{
+    const s = JSON.parse(localStorage.getItem(META_KEY));
+    if(s) return { totalXp:0, best:{}, clearedStages:[], ...s };
+  }catch(e){}
+  return { totalXp:0, best:{}, clearedStages:[] };
 }
 function saveMeta(){ localStorage.setItem(META_KEY, JSON.stringify(meta)); }
 const meta = loadMeta();
@@ -367,7 +479,7 @@ function buildChart(wod){
 
 /* ============== 캐릭터 리그 (관절 기반 옆모습) ============== */
 const RIG = { footX:150, groundY:320, thigh:54, shin:54, torso:76, upperArm:42, foreArm:38, headR:24, boxDrop:46 };
-const REST = { thigh:0, shin:0, torso:0, armA:0, armAElbow:0, armB:0, armBElbow:0, airborne:0, box:0 };
+const REST = { thigh:0, shin:0, torso:0, armA:0, armAElbow:0, armB:0, armBElbow:0, airborne:0, box:0, footX2Offset:0, shin2Delta:0, barbell:0 };
 
 const MOVE_FRAMES = {
   squat: [
@@ -392,6 +504,72 @@ const MOVE_FRAMES = {
     { p:0.50, thigh:-18, shin:6, torso:42, armA:10, armB:-8 },
     { p:0.80, thigh:0, shin:0, torso:-6, armA:172, armB:16, airborne:-4 },
     { p:1.00, ...REST },
+  ],
+
+  // ---- 역도 (바벨) ----
+  lunge: [
+    { p:0.00, ...REST, armA:12, armB:12 },
+    { p:0.50, thigh:-72, shin:16, torso:8, armA:12, armB:12, footX2Offset:-82, shin2Delta:-88 },
+    { p:1.00, ...REST, armA:12, armB:12 },
+  ],
+  deadlift: [
+    { p:0.00, ...REST, armA:4, armB:4 },
+    { p:0.50, thigh:-25, shin:8, torso:66, armA:0, armB:0, barbell:1 },
+    { p:1.00, ...REST, armA:4, armB:4, barbell:1 },
+  ],
+  frontSquat: [
+    { p:0.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.50, thigh:-88, shin:12, torso:10, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:1.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+  ],
+  backSquat: [
+    { p:0.00, armA:115, armB:115, armAElbow:-95, armBElbow:-95, barbell:1 },
+    { p:0.50, thigh:-90, shin:13, torso:16, armA:115, armB:115, armAElbow:-95, armBElbow:-95, barbell:1 },
+    { p:1.00, armA:115, armB:115, armAElbow:-95, armBElbow:-95, barbell:1 },
+  ],
+  ohp: [
+    { p:0.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.50, armA:172, armB:172, torso:-5, barbell:1 },
+    { p:1.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+  ],
+  pushPress: [
+    { p:0.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.28, thigh:-20, shin:6, torso:4, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.55, thigh:0, shin:0, torso:-4, armA:172, armB:172, barbell:1 },
+    { p:1.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+  ],
+  powerClean: [
+    { p:0.00, torso:50, thigh:-10, shin:4, armA:8, armB:8, barbell:1 },
+    { p:0.50, thigh:-35, shin:15, torso:8, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:1.00, torso:50, thigh:-10, shin:4, armA:8, armB:8, barbell:1 },
+  ],
+  powerSnatchBB: [
+    { p:0.00, torso:50, thigh:-10, shin:4, armA:5, armB:5, barbell:1 },
+    { p:0.50, thigh:-30, shin:14, torso:6, armA:172, armB:172, barbell:1 },
+    { p:1.00, torso:50, thigh:-10, shin:4, armA:5, armB:5, barbell:1 },
+  ],
+  thruster: [
+    { p:0.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.50, thigh:-85, shin:12, torso:10, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.78, thigh:0, shin:0, torso:0, armA:172, armB:172, barbell:1 },
+    { p:1.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+  ],
+  hangClean: [
+    { p:0.00, torso:25, thigh:-8, shin:3, armA:8, armB:8, barbell:1 },
+    { p:0.50, thigh:-30, shin:13, torso:6, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:1.00, torso:25, thigh:-8, shin:3, armA:8, armB:8, barbell:1 },
+  ],
+  hangSnatch: [
+    { p:0.00, torso:25, thigh:-8, shin:3, armA:5, armB:5, barbell:1 },
+    { p:0.50, thigh:-26, shin:12, torso:5, armA:172, armB:172, barbell:1 },
+    { p:1.00, torso:25, thigh:-8, shin:3, armA:5, armB:5, barbell:1 },
+  ],
+  pushJerk: [
+    { p:0.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.25, thigh:-18, shin:5, torso:2, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
+    { p:0.50, thigh:-20, shin:20, torso:0, armA:172, armB:172, barbell:1 },
+    { p:0.75, thigh:0, shin:0, torso:0, armA:172, armB:172, barbell:1 },
+    { p:1.00, armA:95, armB:95, armAElbow:-100, armBElbow:-100, barbell:1 },
   ],
 };
 
@@ -454,15 +632,24 @@ function drawCharacter(pose){
   const armA = armPoints(pose.armA, pose.armAElbow);
   const armB = armPoints(pose.armB, pose.armBElbow);
 
-  const backOffset = 10;
-  const shinDir = Math.sin(toRad(shinW));
-  setLine('legBackThigh', hipX-backOffset, hipY, kneeX-backOffset, kneeY);
-  setLine('legBackShin', kneeX-backOffset, kneeY, R.footX-backOffset, gY);
-  setEllipse('legBackShoe', R.footX-backOffset+shinDir*10, gY+2);
+  // 뒷다리: footX2Offset/shin2Delta가 0이면 앞다리와 겹치는 기본값(하위호환), 런지 등은
+  // 독립된 발 위치 + 독립된 종아리 각도를 갖되 골반(hipX,hipY)은 공유해서 다리가 끊어지지 않게 함
+  const backCosmetic = 8;
+  const footX2 = R.footX + (pose.footX2Offset||0) - backCosmetic;
+  const shin2W = shinW + (pose.shin2Delta||0);
+  const knee2X = footX2 + R.shin*Math.sin(toRad(shin2W));
+  const knee2Y = gY - R.shin*Math.cos(toRad(shin2W));
+  const hip2RenderX = hipX - backCosmetic;
+  const shin2Dir = Math.sin(toRad(shin2W));
+  setLine('legBackThigh', hip2RenderX, hipY, knee2X, knee2Y);
+  setLine('legBackShin', knee2X, knee2Y, footX2, gY);
+  setEllipse('legBackShoe', footX2+shin2Dir*10, gY+2);
 
-  setLine('legFrontThigh', hipX+backOffset*0.4, hipY, kneeX+backOffset*0.4, kneeY);
-  setLine('legFrontShin', kneeX+backOffset*0.4, kneeY, R.footX+backOffset*0.4, gY);
-  setEllipse('legFrontShoe', R.footX+backOffset*0.4+shinDir*12, gY+2);
+  const shinDir = Math.sin(toRad(shinW));
+  const frontCosmetic = 4;
+  setLine('legFrontThigh', hipX+frontCosmetic, hipY, kneeX+frontCosmetic, kneeY);
+  setLine('legFrontShin', kneeX+frontCosmetic, kneeY, R.footX+frontCosmetic, gY);
+  setEllipse('legFrontShoe', R.footX+frontCosmetic+shinDir*12, gY+2);
 
   setLine('torsoLine', hipX, hipY, shoulderX, shoulderY);
 
@@ -470,6 +657,18 @@ function drawCharacter(pose){
   setLine('armBackFore', armB.elbowX, armB.elbowY, armB.handX, armB.handY);
   setLine('armFrontUpper', shoulderX, shoulderY, armA.elbowX, armA.elbowY);
   setLine('armFrontFore', armA.elbowX, armA.elbowY, armA.handX, armA.handY);
+
+  // 바벨: 양손 중점에 고정 길이 막대 + 원판. 손이 거의 같은 지점(대칭 그립)일 때 자연스럽게 보임
+  const barOpacity = pose.barbell || 0;
+  const handMidX = (armA.handX+armB.handX)/2;
+  const handMidY = (armA.handY+armB.handY)/2;
+  const barLen = 100;
+  setLine('barbellBar', handMidX-barLen/2, handMidY, handMidX+barLen/2, handMidY);
+  document.getElementById('barbellBar').setAttribute('opacity', barOpacity);
+  setEllipse('barbellPlateA', handMidX-barLen/2, handMidY);
+  document.getElementById('barbellPlateA').setAttribute('opacity', barOpacity);
+  setEllipse('barbellPlateB', handMidX+barLen/2, handMidY);
+  document.getElementById('barbellPlateB').setAttribute('opacity', barOpacity);
 
   const head = document.getElementById('headCircle');
   head.setAttribute('cx', headCX); head.setAttribute('cy', headCY);
@@ -500,30 +699,57 @@ function setTorsoColor(move){
 let game = null;
 let rafId = null;
 
-function startSong(wod){
+function startSong(wod, node){
   Audio.init();
   const chart = buildChart(wod);
   const startTime = Audio.now() + 0.6;
   scheduleBeat(startTime, wod.bpm, chart.duration);
 
+  const totalReps = chart.reps.length;
   game = {
-    wod, chart, startTime,
+    wod, node, chart, startTime,
     nextIndex:0,
     curStation:-1, curStationReps:0,
     score:0, combo:0, maxCombo:0, hp:100,
     counts:{PERFECT:0, GOOD:0, MISS:0},
     finished:false, failed:false, paused:false,
     allDoneAt:null,
+    enemy: node && node.enemy ? { name:node.enemy.name, emoji:node.enemy.emoji, hp:totalReps, maxHp:totalReps } : null,
   };
 
   document.getElementById('playSongName').textContent = wod.name;
   document.getElementById('playSongMeta').textContent = `BPM ${wod.bpm} · ${'★'.repeat(wod.stars)}${'☆'.repeat(4-wod.stars)}`;
   updateHud();
+  updateEnemyUi();
   const first = game.chart.reps[0];
   updateMoveBanner(first ? first.move : 'squat', 0, first ? first.stationReps : 0);
   drawCharacter(poseFor(first ? first.move : 'squat', 0));
   showScreen('play');
   loop();
+}
+
+function updateEnemyUi(){
+  const row = document.getElementById('enemyRow');
+  if(!game.enemy){ row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  document.getElementById('enemySprite').textContent = game.enemy.emoji;
+  document.getElementById('enemyName').textContent = game.enemy.name;
+  document.getElementById('enemyHpFill').style.width = `${Math.max(0, game.enemy.hp/game.enemy.maxHp*100)}%`;
+}
+
+function hitEnemy(){
+  if(!game.enemy) return;
+  game.enemy.hp = Math.max(0, game.enemy.hp-1);
+  updateEnemyUi();
+  const sprite = document.getElementById('enemySprite');
+  sprite.classList.remove('hit'); void sprite.offsetWidth; sprite.classList.add('hit');
+  if(game.enemy.hp === 0){
+    const pop = document.getElementById('enemyHitPop');
+    pop.textContent = 'KO!';
+    pop.classList.add('show');
+    clearTimeout(hitEnemy._t);
+    hitEnemy._t = setTimeout(()=>pop.classList.remove('show'), 500);
+  }
 }
 
 function loop(){
@@ -592,6 +818,7 @@ function judgeRep(rep, grade){
     const base = grade === 'PERFECT' ? 300 : 100;
     game.score += base + game.combo*2;
     Audio.hitSound(grade);
+    hitEnemy();
   }
   showJudgePop(grade);
   updateHud();
@@ -665,12 +892,16 @@ function finishSong(){
   if(!prevBest || game.score > prevBest.score){
     meta.best[key] = { score:game.score, rank };
   }
+  const stageCleared = !game.failed && game.node && !meta.clearedStages.includes(game.node.id);
+  if(stageCleared) meta.clearedStages.push(game.node.id);
   saveMeta();
 
   document.getElementById('resultRank').textContent = rank;
   document.getElementById('resultSub').textContent = game.failed
     ? `${game.wod.name} · 실패 (HP 소진)`
-    : `${game.wod.name} · 정확도 ${acc.toFixed(1)}%`;
+    : stageCleared
+      ? `${game.wod.name} · 클리어! 정확도 ${acc.toFixed(1)}%`
+      : `${game.wod.name} · 정확도 ${acc.toFixed(1)}%`;
   document.getElementById('resultScore').textContent = game.score;
   document.getElementById('resultCombo').textContent = game.maxCombo;
   document.getElementById('resultXp').textContent = `+${xpGained} XP`;
@@ -703,26 +934,39 @@ function renderLegend(){
     </div>`).join('');
 }
 
-function renderSongList(){
-  document.getElementById('songList').innerHTML = WODS.map(w => {
-    const best = meta.best[w.id];
-    const totalReps = w.stations.reduce((a,s)=>a+s.reps,0);
-    const moveNames = [...new Set(w.stations.map(s=>MOVES[s.move].name))].join(' · ');
-    return `
-    <div class="song-card">
-      <div class="song-info">
-        <strong>${w.name}</strong>
-        <p>BPM ${w.bpm} · 총 ${totalReps}회 · ${moveNames}</p>
-        <div class="stars">${'★'.repeat(w.stars)}${'☆'.repeat(4-w.stars)}</div>
-        ${best ? `<div class="best">BEST ${best.score} · RANK ${best.rank}</div>` : ''}
-      </div>
-      <button class="play-btn" data-song="${w.id}">PLAY</button>
-    </div>`;
-  }).join('');
-  document.querySelectorAll('[data-song]').forEach(btn => {
+function renderMap(){
+  let html = '';
+  let flatIndex = 0;
+  WORLDS.forEach(world => {
+    html += `<div class="world-header" style="background:${world.accent}">${world.name}</div><div class="map-path">`;
+    world.nodes.forEach((node, i) => {
+      const idx = flatIndex++;
+      const unlocked = isNodeUnlocked(idx);
+      const cleared = isNodeCleared(node.id);
+      const wod = wodForNode(node);
+      const best = meta.best[node.id];
+      const side = i % 2 === 0 ? '' : 'right';
+      const stars = node.type === 'boss' ? wod.stars : node.stars;
+      const subLabel = node.type === 'boss' ? `보스전 · BPM ${wod.bpm}` : `${MOVES[node.move].name} ${node.reps}회 · BPM ${node.bpm}`;
+      html += `
+      <div class="map-node ${side} ${unlocked ? '' : 'locked'}">
+        <div class="node-dot ${node.type === 'boss' ? 'boss' : ''} ${unlocked ? '' : 'locked'} ${cleared ? 'cleared' : ''}">${node.enemy.emoji}</div>
+        <div class="node-info">
+          <strong>${node.enemy.name}${node.type === 'boss' ? ' (BOSS)' : ''}</strong>
+          <p>${subLabel} · ${'★'.repeat(stars)}${'☆'.repeat(4-stars)}</p>
+          ${best ? `<p class="best">BEST ${best.score} · RANK ${best.rank}</p>` : ''}
+        </div>
+        <button data-node-idx="${idx}" ${unlocked ? '' : 'disabled'}>${unlocked ? 'PLAY' : '🔒'}</button>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  document.getElementById('worldMap').innerHTML = html;
+  document.querySelectorAll('[data-node-idx]').forEach(btn => {
+    if(btn.disabled) return;
     btn.onclick = () => {
-      const wod = WODS.find(w => w.id === btn.dataset.song);
-      startSong(wod);
+      const node = FLAT_NODES[Number(btn.dataset.nodeIdx)];
+      startSong(wodForNode(node), node);
     };
   });
 }
@@ -751,21 +995,23 @@ document.getElementById('exitBtn').addEventListener('click', () => {
   cancelAnimationFrame(rafId);
   Audio.close();
   game = null;
+  renderMap();
   showScreen('menu');
 });
 
 document.getElementById('retryBtn').addEventListener('click', () => {
-  const wod = game ? game.wod : WODS[0];
-  startSong(wod);
+  const wod = game ? game.wod : wodForNode(FLAT_NODES[0]);
+  const node = game ? game.node : FLAT_NODES[0];
+  startSong(wod, node);
 });
 document.getElementById('menuBtn').addEventListener('click', () => {
-  renderSongList();
+  renderMap();
   showScreen('menu');
 });
 
 /* ============== 초기화 ============== */
 renderLegend();
-renderSongList();
+renderMap();
 renderLevelChip();
 showScreen('menu');
 </script>
