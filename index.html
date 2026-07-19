@@ -1,542 +1,624 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>박스 레벨업 GM</title>
-  <style>
-    :root{
-      --bg:#07101b;
-      --bg2:#0b1727;
-      --card:rgba(17,27,44,.94);
-      --card2:rgba(23,37,59,.95);
-      --line:rgba(255,255,255,.08);
-      --text:#eef4ff;
-      --muted:#93a4c2;
-      --gold:#f7bf4f;
-      --orange:#ff8a3d;
-      --green:#49d59a;
-      --blue:#6ea6ff;
-      --red:#ff6a80;
-      --purple:#a889ff;
-      --shadow:0 24px 80px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;background:radial-gradient(circle at top, rgba(110,166,255,.18), transparent 25%), radial-gradient(circle at bottom, rgba(255,138,61,.12), transparent 25%), linear-gradient(180deg,var(--bg),#050b13);color:var(--text);font-family:Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif}
-    button,input,select{font:inherit}
-    button{cursor:pointer}
-    .app{max-width:430px;margin:0 auto;min-height:100vh;padding:18px 14px 28px}
-    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-    .brand{font-weight:900;font-size:28px;line-height:1;background:linear-gradient(135deg,#fff0c6,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .sub{margin-top:6px;color:var(--muted);font-size:12px}
-    .lvl-chip{padding:8px 12px;border-radius:999px;background:rgba(110,166,255,.13);border:1px solid rgba(110,166,255,.25);color:#cfe1ff;font-weight:800;font-size:12px}
-    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;padding:16px;border-radius:26px;background:linear-gradient(135deg, rgba(29,51,95,.96), rgba(14,100,79,.92));border:1px solid var(--line);box-shadow:var(--shadow);margin-bottom:14px}
-    .eyebrow{font-size:11px;letter-spacing:1.2px;color:#dce8ff;opacity:.82}
-    .nickname{margin:8px 0 2px;font-size:28px;font-weight:900;border:none;background:transparent;color:#fff;width:100%;padding:0;outline:none}
-    .meta{font-size:13px;color:#d8ffe9;margin-bottom:12px}
-    .xp-row,.small-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#dbe7fb}
-    .xp{height:10px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden;margin-top:8px}
-    .xp>div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:inherit;transition:width .25s ease}
-    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .badge{padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.18);font-size:12px}
-    .stage{position:relative;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));min-height:240px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
-    .glow{position:absolute;left:10%;right:10%;bottom:14px;height:52px;border-radius:50%;background:radial-gradient(circle, rgba(247,191,79,.6), rgba(247,191,79,0));}
-    .character-img{position:relative;z-index:2;width:92%;max-height:228px;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(0,0,0,.22))}
-    .equip-float{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:3}
-    .equip-float span{padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.09);font-size:11px}
-    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-    .tab{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:4px}
-    .tab.active{color:#fff;background:rgba(255,255,255,.09);border-color:rgba(247,191,79,.26)}
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;backdrop-filter:blur(8px);box-shadow:0 10px 36px rgba(0,0,0,.14)}
-    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
-    .panel-head h3{margin:0;font-size:18px}
-    .hint{font-size:11px;color:var(--muted)}
-    .grid-characters{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .char-card{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:10px;color:var(--text);display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
-    .char-card img{width:72px;height:84px;object-fit:contain}
-    .char-card span{font-size:11px;color:var(--muted)}
-    .char-card.active{border-color:rgba(247,191,79,.45);box-shadow:inset 0 0 0 1px rgba(247,191,79,.16)}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .stat{border-radius:18px;padding:14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04)}
-    .stat.orange{background:rgba(255,138,61,.12)} .stat.gold{background:rgba(247,191,79,.12)} .stat.green{background:rgba(73,213,154,.12)} .stat.blue{background:rgba(110,166,255,.12)} .stat.purple{background:rgba(168,137,255,.12)} .stat.red{background:rgba(255,106,128,.12)}
-    .stat label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}
-    .stat strong{font-size:25px}
-    .equip-list,.records,.ranks{display:flex;flex-direction:column;gap:10px}
-    .equip-item,.record,.rank{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--card2);color:var(--text)}
-    .equip-item.active{border-color:rgba(73,213,154,.28);box-shadow:inset 0 0 0 1px rgba(73,213,154,.18)}
-    .equip-main strong,.record strong,.rank strong{display:block;font-size:15px}
-    .equip-main p,.record p,.rank p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .slot{display:inline-block;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px;color:#dce8ff;margin-left:8px}
-    .state{min-width:64px;text-align:center;font-weight:800;color:#d4ffe8}
-    .form{display:grid;gap:10px}
-    .form.compact{grid-template-columns:1fr 1fr auto}
-    input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);color:var(--text);outline:none}
-    input::placeholder{color:#8fa2c4}
-    .primary,.secondary,.ghost{border:none;padding:13px 14px;border-radius:14px;font-weight:800}
-    .primary{background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200}
-    .secondary{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text)}
-    .ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
-    .code-help,.help{font-size:12px;color:var(--muted);margin-top:10px}
-    .record-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;font-size:12px}
-    .pill{display:inline-flex;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px}
-    .pill.ok{background:rgba(73,213,154,.16);color:#cffff0}
-    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .mini-grid.three{grid-template-columns:repeat(3,1fr)}
-    .mini{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:6px}
-    .mini span{font-size:19px;font-weight:900}
-    .mini small{color:var(--muted)}
-    .upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    .rank.me{border-color:rgba(247,191,79,.3)}
-    .rank-left{display:flex;align-items:center;gap:12px}
-    .rank-no{width:36px;height:36px;border-radius:12px;background:rgba(247,191,79,.14);display:grid;place-items:center;font-weight:900;color:#ffe9a8}
-    .rank-score{font-size:20px;font-weight:900}
-    .formula{display:grid;gap:10px;color:#d9e5f8}
-    .formula p{margin:0}
-    .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(120%);background:rgba(8,16,30,.96);border:1px solid rgba(247,191,79,.26);color:#fff;padding:14px 16px;border-radius:16px;min-width:280px;max-width:calc(100vw - 28px);text-align:center;box-shadow:0 12px 30px rgba(0,0,0,.3);transition:transform .25s ease;z-index:10}
-    .toast.show{transform:translateX(-50%) translateY(0)}
-    .hidden{display:none}
-    .small-note{font-size:11px;color:var(--muted)}
-    @media (max-width:380px){.hero{grid-template-columns:1fr}.grid-characters,.stats,.mini-grid.three,.upload-grid,.form.compact{grid-template-columns:1fr 1fr}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>박스비트 · CrossFit Rhythm</title>
+<style>
+  :root{
+    --bg:#07101b;
+    --card:rgba(17,27,44,.94);
+    --card2:rgba(23,37,59,.95);
+    --line:rgba(255,255,255,.08);
+    --text:#eef4ff;
+    --muted:#93a4c2;
+    --gold:#f7bf4f;
+    --orange:#ff8a3d;
+    --green:#49d59a;
+    --blue:#6ea6ff;
+    --red:#ff6a80;
+    --shadow:0 24px 80px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none}
+  html,body{margin:0;min-height:100%;background:radial-gradient(circle at top, rgba(110,166,255,.18), transparent 25%), radial-gradient(circle at bottom, rgba(255,138,61,.12), transparent 25%), linear-gradient(180deg,var(--bg),#050b13);color:var(--text);font-family:Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;overscroll-behavior:none}
+  button{font:inherit;cursor:pointer}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding:16px 14px 24px;display:flex;flex-direction:column}
+  .hidden{display:none !important}
+  .brand-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .brand{font-weight:900;font-size:26px;line-height:1;background:linear-gradient(135deg,#fff0c6,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .brand-sub{margin-top:4px;color:var(--muted);font-size:11px}
+  .lvl-chip{padding:8px 12px;border-radius:999px;background:rgba(110,166,255,.13);border:1px solid rgba(110,166,255,.25);color:#cfe1ff;font-weight:800;font-size:12px;white-space:nowrap}
+
+  /* ---- menu ---- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 10px 36px rgba(0,0,0,.14)}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .panel-head h3{margin:0;font-size:16px}
+  .hint{font-size:11px;color:var(--muted)}
+  .how{display:flex;flex-direction:column;gap:8px;font-size:12px;color:#d9e5f8}
+  .how b{color:var(--gold)}
+  .legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .legend-item{border:1px solid var(--line);border-radius:14px;padding:8px 4px;text-align:center;background:rgba(255,255,255,.03)}
+  .legend-item .emo{font-size:20px}
+  .legend-item .nm{font-size:10px;color:var(--muted);margin-top:2px}
+  .legend-item .ky{margin-top:4px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:8px;display:inline-block}
+  .song-list{display:flex;flex-direction:column;gap:10px}
+  .song-card{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px}
+  .song-info{flex:1;min-width:0}
+  .song-info strong{display:block;font-size:15px}
+  .song-info p{margin:4px 0 0;color:var(--muted);font-size:12px}
+  .stars{color:var(--gold);font-size:12px;letter-spacing:1px}
+  .best{font-size:11px;color:var(--green);margin-top:2px}
+  .play-btn{border:none;border-radius:14px;padding:12px 16px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200;flex-shrink:0}
+
+  /* ---- play ---- */
+  .hud{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+  .hud-left strong{font-size:15px;display:block}
+  .hud-left span{font-size:11px;color:var(--muted)}
+  .hud-right{text-align:right}
+  .score{font-size:22px;font-weight:900}
+  .combo{font-size:12px;color:var(--gold);font-weight:800;min-height:14px}
+  .hp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .hp-row span{font-size:10px;color:var(--muted);width:24px}
+  .hp-bar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .hp-bar>div{height:100%;width:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:inherit;transition:width .2s ease}
+  .progress-bar{height:5px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:12px}
+  .progress-bar>div{height:100%;width:0;background:var(--blue);border-radius:inherit}
+
+  .game-stage{position:relative;height:min(56vh,420px);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.18));border:1px solid var(--line);overflow:hidden;display:flex;box-shadow:var(--shadow)}
+  .lane{flex:1;position:relative;border-right:1px solid rgba(255,255,255,.05)}
+  .lane:last-child{border-right:none}
+  .lane.flash{background:rgba(255,255,255,.08)}
+  .hit-line{position:absolute;left:0;right:0;bottom:66px;height:3px;background:rgba(255,255,255,.35)}
+  .receptor{position:absolute;left:50%;bottom:66px;transform:translate(-50%,50%);width:52px;height:52px;border-radius:16px;border:2px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,.04);transition:transform .08s ease, background .12s ease}
+  .receptor.hit{transform:translate(-50%,50%) scale(1.18)}
+  .note{position:absolute;left:8%;right:8%;height:40px;border-radius:12px;top:-50px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+  .lane-0 .receptor,.lane-0 .note{border-color:var(--blue)} .lane-0 .note{background:linear-gradient(135deg,#3a6bd4,var(--blue))}
+  .lane-1 .receptor,.lane-1 .note{border-color:var(--orange)} .lane-1 .note{background:linear-gradient(135deg,#c85a1f,var(--orange))}
+  .lane-2 .receptor,.lane-2 .note{border-color:var(--green)} .lane-2 .note{background:linear-gradient(135deg,#1f9d6b,var(--green))}
+  .lane-3 .receptor,.lane-3 .note{border-color:var(--gold)} .lane-3 .note{background:linear-gradient(135deg,#d69420,var(--gold))}
+  .judge-pop{position:absolute;left:0;right:0;bottom:130px;text-align:center;font-size:20px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .12s ease, transform .12s ease;transform:translateY(6px)}
+  .judge-pop.show{opacity:1;transform:translateY(-6px)}
+  .judge-pop.PERFECT{color:var(--gold)} .judge-pop.GREAT{color:var(--green)} .judge-pop.GOOD{color:var(--blue)} .judge-pop.MISS{color:var(--red)}
+  .combo-big{position:absolute;top:14px;left:0;right:0;text-align:center;font-size:15px;font-weight:900;color:#fff;opacity:.85;pointer-events:none}
+
+  .tap-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .tap-btn{border-radius:16px;padding:14px 4px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:2px}
+  .tap-btn .emo{font-size:20px}
+  .tap-btn .nm{font-size:10px;color:var(--muted)}
+  .tap-btn:active,.tap-btn.active{transform:scale(.95)}
+  .tap-btn.lane-0{box-shadow:inset 0 0 0 1px rgba(110,166,255,.4)}
+  .tap-btn.lane-1{box-shadow:inset 0 0 0 1px rgba(255,138,61,.4)}
+  .tap-btn.lane-2{box-shadow:inset 0 0 0 1px rgba(73,213,154,.4)}
+  .tap-btn.lane-3{box-shadow:inset 0 0 0 1px rgba(247,191,79,.4)}
+
+  .play-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:10px 14px;font-size:12px}
+
+  /* ---- result ---- */
+  .result-rank{text-align:center;font-size:64px;font-weight:900;line-height:1;margin:10px 0 4px;background:linear-gradient(135deg,#fff0c6,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .result-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px}
+  .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  .result-mini{border:1px solid var(--line);background:var(--card2);border-radius:16px;padding:12px;text-align:center}
+  .result-mini strong{display:block;font-size:20px}
+  .result-mini span{font-size:11px;color:var(--muted)}
+  .judge-breakdown{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .jb-row{display:flex;justify-content:space-between;font-size:13px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04)}
+  .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .primary{border:none;border-radius:14px;padding:14px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200}
+  .secondary{border:1px solid var(--line);border-radius:14px;padding:14px;font-weight:800;background:rgba(255,255,255,.06);color:var(--text)}
+
+  @media (max-width:360px){.legend{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <div>
-        <div class="brand">박스 레벨업 GM</div>
-        <div class="sub">우리 박스 안에서 레벨업하는 크로스핏 RPG</div>
-      </div>
-      <div class="lvl-chip" id="levelChip">LV 1</div>
+<div class="app" id="app">
+
+  <div class="brand-row">
+    <div>
+      <div class="brand">박스비트</div>
+      <div class="brand-sub">크로스핏 동작 리듬게임</div>
     </div>
-
-    <section class="hero">
-      <div>
-        <div class="eyebrow">BOX MEMBER PROFILE</div>
-        <input class="nickname" id="nickname" value="WOD Hunter" />
-        <div class="meta" id="charMeta">시바 · 밸런스 올라운더</div>
-        <div class="xp-row"><span id="xpText">XP 0</span><span id="nextText">다음 레벨까지 180 XP</span></div>
-        <div class="xp"><div id="xpBar"></div></div>
-        <div class="badge-row">
-          <span class="badge" id="verifiedBadge">코치 인증 0회</span>
-          <span class="badge" id="prBadge">PR 0개</span>
-          <span class="badge" id="inbodyBadge">인바디 0회</span>
-        </div>
-      </div>
-      <div class="stage">
-        <div class="glow"></div>
-        <img id="heroCharacter" class="character-img" src="assets/characters/dog.png" alt="dog" />
-        <div class="equip-float" id="equipFloat"></div>
-      </div>
-    </section>
-
-    <nav class="tabs">
-      <button class="tab active" data-tab="home">🏠 홈</button>
-      <button class="tab" data-tab="wod">🏋️ WOD</button>
-      <button class="tab" data-tab="inbody">📊 인바디</button>
-      <button class="tab" data-tab="rank">🏆 랭킹</button>
-    </nav>
-
-    <main>
-      <section class="tab-panel" id="panel-home">
-        <div class="panel">
-          <div class="panel-head"><h3>캐릭터 선택</h3><span class="hint">5종 동물 선택형</span></div>
-          <div class="grid-characters" id="characterGrid"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>능력치</h3><span class="hint">인바디 + 장비 자동 반영</span></div>
-          <div class="stats" id="statsGrid"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>장비 인벤토리</h3><span class="hint">착용 / 해제 가능</span></div>
-          <div class="equip-list" id="equipList"></div>
-        </div>
-      </section>
-
-      <section class="tab-panel hidden" id="panel-wod">
-        <div class="panel">
-          <div class="panel-head"><h3>WOD 기록 등록</h3><span class="hint">코치 인증코드 일치 시 인증</span></div>
-          <form class="form" id="wodForm">
-            <input name="name" placeholder="WOD 이름" required />
-            <select name="type">
-              <option>For Time</option><option>AMRAP</option><option>EMOM</option><option>Chipper</option>
-            </select>
-            <input name="score" placeholder="기록 예: 6:35 / 8 Rounds" required />
-            <input name="code" placeholder="코치 인증코드" />
-            <input name="memo" placeholder="메모" />
-            <button class="primary" type="submit">저장하기</button>
-          </form>
-          <div class="code-help">테스트용 인증코드: <code id="codeExample"></code></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>최근 WOD</h3><span class="hint">인증 시 +80 XP / 일반 +30 XP</span></div>
-          <div class="records" id="wodList"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>PR 등록</h3><span class="hint">신규 PR 1개당 +100 XP</span></div>
-          <form class="form compact" id="prForm">
-            <input name="event" placeholder="종목 예: Snatch" required />
-            <input name="record" placeholder="기록 예: 75kg" required />
-            <button class="primary" type="submit">PR 저장</button>
-          </form>
-          <div class="mini-grid" id="prList"></div>
-        </div>
-      </section>
-
-      <section class="tab-panel hidden" id="panel-inbody">
-        <div class="panel">
-          <div class="panel-head"><h3>인바디 입력</h3><span class="hint">수동 입력 + CSV 업로드</span></div>
-          <form class="form" id="inbodyForm">
-            <input type="date" name="date" required />
-            <input type="number" name="weight" step="0.1" placeholder="체중 (kg)" required />
-            <input type="number" name="muscle" step="0.1" placeholder="골격근량 (kg)" required />
-            <input type="number" name="fatPercent" step="0.1" placeholder="체지방률 (%)" required />
-            <button class="primary" type="submit">능력치 반영</button>
-          </form>
-          <div class="upload-grid">
-            <label class="secondary" style="display:flex;align-items:center;justify-content:center;gap:8px">
-              CSV 업로드
-              <input id="csvUpload" type="file" accept=".csv" style="display:none" />
-            </label>
-            <label class="ghost" style="display:flex;align-items:center;justify-content:center;gap:8px">
-              인바디 사진 업로드 예정
-              <input id="imageUpload" type="file" accept="image/*" style="display:none" />
-            </label>
-          </div>
-          <div class="help">CSV는 headers: <code>date,weight,muscle,fatPercent</code> 형식을 지원해.</div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>최근 측정값</h3><span class="hint">증감 비교</span></div>
-          <div class="mini-grid three" id="latestInbody"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>인바디 히스토리</h3><span class="hint">최신순 정렬</span></div>
-          <div class="records" id="inbodyList"></div>
-        </div>
-      </section>
-
-      <section class="tab-panel hidden" id="panel-rank">
-        <div class="panel">
-          <div class="panel-head"><h3>박스 랭킹</h3><span class="hint">누적 XP + PR + 인증 가산</span></div>
-          <div class="ranks" id="rankList"></div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><h3>점수 계산식</h3><span class="hint">MVP 기준</span></div>
-          <div class="formula">
-            <p>일반 WOD +30 XP</p>
-            <p>코치 인증 WOD +80 XP</p>
-            <p>신규 PR +100 XP</p>
-            <p>인바디 입력 +20 XP</p>
-          </div>
-        </div>
-      </section>
-    </main>
+    <div class="lvl-chip" id="levelChip">LV 1</div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- ===== MENU SCREEN ===== -->
+  <section id="screen-menu">
+    <div class="panel">
+      <div class="panel-head"><h3>플레이 방법</h3><span class="hint">키보드 / 터치</span></div>
+      <div class="how">
+        <p>박자에 맞춰 내려오는 동작 노트가 <b>판정선</b>에 닿는 순간, 같은 레인의 키(또는 버튼)를 눌러줘.</p>
+        <p><b>D · F · J · K</b> 키 또는 화면 하단 버튼으로 입력할 수 있어.</p>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h3>WOD 트랙 선택</h3><span class="hint">난이도 순</span></div>
+      <div class="song-list" id="songList"></div>
+    </div>
+  </section>
+
+  <!-- ===== PLAY SCREEN ===== -->
+  <section id="screen-play" class="hidden">
+    <div class="hud">
+      <div class="hud-left">
+        <strong id="playSongName">-</strong>
+        <span id="playSongMeta">-</span>
+      </div>
+      <div class="hud-right">
+        <div class="score" id="playScore">0</div>
+        <div class="combo" id="playCombo"></div>
+      </div>
+    </div>
+    <div class="hp-row"><span>HP</span><div class="hp-bar"><div id="hpFill"></div></div></div>
+    <div class="progress-bar"><div id="progressFill"></div></div>
+
+    <div class="game-stage" id="gameStage">
+      <div class="combo-big hidden" id="comboBig"></div>
+      <div class="judge-pop" id="judgePop"></div>
+    </div>
+
+    <div class="tap-row" id="tapRow"></div>
+
+    <div class="play-footer">
+      <button class="ghost" id="pauseBtn">일시정지</button>
+      <button class="ghost" id="exitBtn">그만하기</button>
+    </div>
+  </section>
+
+  <!-- ===== RESULT SCREEN ===== -->
+  <section id="screen-result" class="hidden">
+    <div class="panel">
+      <div class="result-rank" id="resultRank">S</div>
+      <div class="result-sub" id="resultSub">-</div>
+      <div class="result-grid">
+        <div class="result-mini"><strong id="resultScore">0</strong><span>SCORE</span></div>
+        <div class="result-mini"><strong id="resultCombo">0</strong><span>MAX COMBO</span></div>
+      </div>
+      <div class="judge-breakdown" id="judgeBreakdown"></div>
+      <div class="result-mini" style="margin-bottom:16px">
+        <strong id="resultXp">+0 XP</strong>
+        <span>획득 경험치</span>
+      </div>
+      <div class="result-actions">
+        <button class="secondary" id="retryBtn">다시하기</button>
+        <button class="primary" id="menuBtn">트랙 선택</button>
+      </div>
+    </div>
+  </section>
+
+</div>
 
 <script>
-const STORAGE_KEY = 'box-rpg-gm-v2';
-const COACH_CODES = ['COACH-KIM-2026','BOX-RX-MASTER','WOD-VERIFY-777'];
-const CHARACTERS = [
-  {id:'dog', name:'시바', title:'밸런스 올라운더', image:'assets/characters/dog.png'},
-  {id:'cat', name:'캘리코', title:'민첩한 테크니션', image:'assets/characters/cat.png'},
-  {id:'panda', name:'판더', title:'헤비 리프터', image:'assets/characters/panda.png'},
-  {id:'hamster', name:'햄찌', title:'꾸준한 성장형', image:'assets/characters/hamster.png'},
-  {id:'rabbit', name:'래빗', title:'스피드 러너', image:'assets/characters/rabbit.png'},
-];
-const EQUIPMENT = [
-  {id:'headband', slot:'머리', name:'헤드밴드', bonus:{agi:2}, unlock:'WOD 3회', unlockedBy:s => s.wods.length >= 3},
-  {id:'wrist', slot:'손목', name:'손목 보호대', bonus:{vit:2}, unlock:'코치 인증 1회', unlockedBy:s => s.wods.filter(w=>w.verified).length >= 1},
-  {id:'grips', slot:'손', name:'체조 그립', bonus:{agi:3}, unlock:'WOD 5회', unlockedBy:s => s.wods.length >= 5},
-  {id:'belt', slot:'허리', name:'리프팅 벨트', bonus:{str:4}, unlock:'PR 1회', unlockedBy:s => s.prs.length >= 1},
-  {id:'knee', slot:'다리', name:'무릎 보호대', bonus:{end:3}, unlock:'레벨 3', unlockedBy:s => levelFromXp(calcXp(s)) >= 3},
-  {id:'shoes', slot:'신발', name:'역도화', bonus:{str:2, vit:1}, unlock:'WOD 8회', unlockedBy:s => s.wods.length >= 8},
-  {id:'vest', slot:'특수', name:'중량조끼', bonus:{end:4}, unlock:'코치 인증 3회', unlockedBy:s => s.wods.filter(w=>w.verified).length >= 3},
+/* ============== 데이터 ============== */
+const LANES = [
+  {id:0, key:'D', name:'스쿼트', emoji:'🦵'},
+  {id:1, key:'F', name:'버피',   emoji:'🔥'},
+  {id:2, key:'J', name:'박스점프', emoji:'⬆️'},
+  {id:3, key:'K', name:'스내치', emoji:'🏋️'},
 ];
 
-const initialState = {
-  nickname:'WOD Hunter',
-  selectedCharacter:'dog',
-  equipped:{},
-  wods:[
-    {id:1,name:'Fran',type:'For Time',score:'5:42',memo:'숨 턱끝까지',verified:true,xp:80,date:'2026-03-15'},
-    {id:2,name:'DT',type:'For Time',score:'7:55',memo:'후반 버티기',verified:false,xp:30,date:'2026-03-18'}
-  ],
-  prs:[
-    {event:'Clean',record:'95kg',date:'2026-03-15'},
-    {event:'Front Squat',record:'130kg',date:'2026-03-10'}
-  ],
-  inbodyRecords:[
-    {date:'2026-03-01',weight:72,muscle:37.4,fatPercent:12},
-    {date:'2026-03-23',weight:72,muscle:37.4,fatPercent:12}
-  ]
+const SONGS = [
+  {
+    id:'squat-warmup', name:'스쿼트 웜업', bpm:100, stars:1, travel:1.6, target:40,
+    phrase:['1...1...','1...2...','2...1...','1.2.1...']
+  },
+  {
+    id:'burpee-groove', name:'버피 그루브', bpm:126, stars:2, travel:1.45, target:50,
+    phrase:['1.2.1.2.','1.3.1.2.','2.1.2.1.','1.3.2.4.']
+  },
+  {
+    id:'boxjump-rush', name:'박스점프 러쉬', bpm:148, stars:3, travel:1.3, target:55,
+    phrase:['1.23.4.1','2.13.2.4','3.24.1.3','1.34.2.1']
+  },
+  {
+    id:'murph-overdrive', name:'머프 오버드라이브', bpm:168, stars:4, travel:1.2, target:50,
+    phrase:['12341234','1.3.2.4.','13241324','2.4.1.3.']
+  },
+];
+
+const PERFECT_WINDOW = 0.06;
+const GOOD_WINDOW = 0.16;
+const MISS_WINDOW = 0.2;
+
+const META_KEY = 'boxbeat-meta-v1';
+function loadMeta(){
+  try{ const s = JSON.parse(localStorage.getItem(META_KEY)); if(s) return s; }catch(e){}
+  return { totalXp:0, best:{} };
+}
+function saveMeta(){ localStorage.setItem(META_KEY, JSON.stringify(meta)); }
+const meta = loadMeta();
+function levelFromXp(xp){ return Math.floor(xp/500)+1; }
+
+/* ============== 오디오 ============== */
+const Audio = {
+  ctx:null,
+  init(){
+    if(!this.ctx || this.ctx.state === 'closed'){
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  now(){ return this.ctx.currentTime; },
+  close(){ if(this.ctx && this.ctx.state !== 'closed'){ try{ this.ctx.close(); }catch(e){} } this.ctx = null; },
+  tone(time, freq, dur, type='sine', vol=.18){
+    const ctx = this.ctx;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, time);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(vol, time+0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time+dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(time); osc.stop(time+dur+0.02);
+  },
+  noise(time, dur, vol, filterFreq, filterType='highpass'){
+    const ctx = this.ctx;
+    const bufSize = Math.max(1, Math.floor(ctx.sampleRate*dur));
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++) data[i] = (Math.random()*2-1)*(1-i/bufSize);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filt = ctx.createBiquadFilter(); filt.type = filterType; filt.frequency.value = filterFreq;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(vol, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time+dur);
+    src.connect(filt); filt.connect(gain); gain.connect(ctx.destination);
+    src.start(time); src.stop(time+dur+0.02);
+  },
+  kick(time){
+    const ctx = this.ctx;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(45, time+0.12);
+    gain.gain.setValueAtTime(0.5, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time+0.16);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(time); osc.stop(time+0.2);
+  },
+  hihat(time){ this.noise(time, 0.05, 0.06, 7000); },
+  snare(time){ this.noise(time, 0.12, 0.22, 1800, 'bandpass'); },
+  hitSound(lane, grade){
+    const freqs = [392, 440, 494, 587];
+    const vol = grade === 'PERFECT' ? .22 : .14;
+    this.tone(this.now(), freqs[lane], grade === 'PERFECT' ? 0.16 : 0.1, 'triangle', vol);
+  },
+  missSound(){ this.noise(this.now(), 0.1, 0.12, 300, 'lowpass'); },
 };
 
-const state = loadState();
+function scheduleBeat(startTime, bpm, durationSec){
+  const eighth = 60/bpm/2;
+  const totalEighths = Math.round(durationSec/eighth);
+  for(let i=0;i<totalEighths;i++){
+    const t = startTime + i*eighth;
+    if(i % 2 === 0) Audio.kick(t);
+    Audio.hihat(t);
+    const beatIndex = Math.floor(i/2) % 4;
+    if(i % 2 === 0 && (beatIndex === 1 || beatIndex === 3)) Audio.snare(t);
+  }
+}
 
-function loadState(){
-  try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(saved) return {...initialState, ...saved};}catch(e){}
-  return structuredClone(initialState);
+/* ============== 채보 생성 ============== */
+function buildChart(song){
+  const eighth = 60/song.bpm/2;
+  const barDur = eighth*8;
+  const bars = Math.max(4, Math.round(song.target/barDur));
+  const notes = [];
+  for(let b=0; b<bars; b++){
+    const row = song.phrase[b % song.phrase.length];
+    const barStart = b*barDur;
+    for(let i=0;i<8;i++){
+      const ch = row[i];
+      if(ch !== '.'){
+        notes.push({ time: barStart + i*eighth, lane: Number(ch)-1, judged:false });
+      }
+    }
+  }
+  return { notes, duration: bars*barDur };
 }
-function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function showToast(message){
-  const t = document.getElementById('toast');
-  t.textContent = message; t.classList.add('show');
-  clearTimeout(showToast._timer); showToast._timer = setTimeout(()=>t.classList.remove('show'), 2200);
-}
-function calcXp(s=state){ return s.wods.reduce((a,b)=>a+b.xp,0) + s.prs.length * 100 + s.inbodyRecords.length * 20; }
-function levelFromXp(xp){ return Math.floor(xp / 180) + 1; }
-function latestInbody(){ return [...state.inbodyRecords].sort((a,b)=>a.date.localeCompare(b.date)).at(-1); }
-function prevInbody(){ const sorted=[...state.inbodyRecords].sort((a,b)=>a.date.localeCompare(b.date)); return sorted.length > 1 ? sorted.at(-2) : null; }
-function calcBaseStats(){
-  const ib = latestInbody() || {weight:70,muscle:30,fatPercent:20};
-  const wodCount = state.wods.length;
-  const verified = state.wods.filter(w=>w.verified).length;
-  return {
-    str: Math.max(1, Math.round(ib.muscle * 1.8)),
-    vit: Math.max(1, Math.round((ib.weight * .45) + (ib.muscle * .9))),
-    end: Math.max(1, Math.round((100 - ib.fatPercent) * .45 + wodCount * 1.1)),
-    agi: Math.max(1, Math.round((100 - ib.fatPercent) * .7 + Math.min(wodCount, 20))),
-    men: Math.max(1, 10 + verified * 6 + Math.floor(wodCount / 2))
+
+/* ============== 상태 ============== */
+let game = null;
+let rafId = null;
+
+function startSong(song){
+  Audio.init();
+  const chart = buildChart(song);
+  const startTime = Audio.now() + 0.6;
+  scheduleBeat(startTime, song.bpm, chart.duration);
+
+  game = {
+    song, chart, startTime,
+    travel: song.travel,
+    activeNotes: [],
+    nextIndex: 0,
+    score:0, combo:0, maxCombo:0, hp:100,
+    counts:{PERFECT:0, GOOD:0, MISS:0},
+    finished:false, failed:false, paused:false,
   };
-}
-function calcEquipmentBonus(){
-  const bonus={str:0,vit:0,end:0,agi:0,men:0};
-  Object.values(state.equipped).forEach(itemId => {
-    const item = EQUIPMENT.find(v => v.id === itemId);
-    if(!item) return;
-    Object.entries(item.bonus).forEach(([k,v]) => bonus[k] += v);
-  });
-  return bonus;
-}
-function calcStats(){
-  const base = calcBaseStats();
-  const eq = calcEquipmentBonus();
-  return {
-    str: base.str + eq.str,
-    vit: base.vit + eq.vit,
-    end: base.end + eq.end,
-    agi: base.agi + eq.agi,
-    men: base.men + eq.men,
-    power: base.str + base.vit + base.end + base.agi + base.men + eq.str + eq.vit + eq.end + eq.agi + eq.men,
-  }
-}
-function selectedCharacter(){ return CHARACTERS.find(v => v.id === state.selectedCharacter) || CHARACTERS[0]; }
-function formatBonus(bonus){ return Object.entries(bonus).map(([k,v]) => `${k.toUpperCase()} +${v}`).join(' · '); }
-function diff(current, previous, key){ if(!current || !previous) return '첫 기록'; const d = +(current[key] - previous[key]).toFixed(1); return `${d > 0 ? '+' : ''}${d}${key === 'fatPercent' ? '%' : 'kg'}`; }
-function canEquip(item){ return item.unlockedBy(state); }
-function toggleEquip(itemId){
-  const item = EQUIPMENT.find(v => v.id === itemId); if(!item) return;
-  if(!canEquip(item)){ showToast(`아직 잠금 상태야 · ${item.unlock}`); return; }
-  if(state.equipped[item.slot] === item.id){ delete state.equipped[item.slot]; showToast(`${item.name} 해제!`); }
-  else { state.equipped[item.slot] = item.id; showToast(`${item.name} 장착!`); }
-  persist(); render();
-}
 
-function renderHeader(){
-  const xp = calcXp();
-  const level = levelFromXp(xp);
-  const currentLevelXp = xp % 180;
-  document.getElementById('levelChip').textContent = `LV ${level}`;
-  document.getElementById('xpText').textContent = `XP ${xp}`;
-  document.getElementById('nextText').textContent = `다음 레벨까지 ${180 - currentLevelXp || 180} XP`;
-  document.getElementById('xpBar').style.width = `${currentLevelXp / 180 * 100}%`;
-  document.getElementById('verifiedBadge').textContent = `코치 인증 ${state.wods.filter(v=>v.verified).length}회`;
-  document.getElementById('prBadge').textContent = `PR ${state.prs.length}개`;
-  document.getElementById('inbodyBadge').textContent = `인바디 ${state.inbodyRecords.length}회`;
-}
-
-function renderHero(){
-  const c = selectedCharacter();
-  document.getElementById('nickname').value = state.nickname;
-  document.getElementById('charMeta').textContent = `${c.name} · ${c.title}`;
-  const img = document.getElementById('heroCharacter'); img.src = c.image; img.alt = c.name;
-  const float = document.getElementById('equipFloat');
-  float.innerHTML = Object.values(state.equipped).map(id => EQUIPMENT.find(v => v.id === id)).filter(Boolean).slice(0,4).map(item => `<span>${item.name}</span>`).join('') || '<span>장비 없음</span>';
-}
-
-function renderCharacters(){
-  const container = document.getElementById('characterGrid');
-  container.innerHTML = CHARACTERS.map(c => `
-    <button class="char-card ${state.selectedCharacter === c.id ? 'active' : ''}" data-character="${c.id}">
-      <img src="${c.image}" alt="${c.name}" />
-      <strong>${c.name}</strong>
-      <span>${c.title}</span>
+  document.getElementById('playSongName').textContent = song.name;
+  document.getElementById('playSongMeta').textContent = `BPM ${song.bpm} · ${'★'.repeat(song.stars)}${'☆'.repeat(4-song.stars)}`;
+  document.getElementById('gameStage').innerHTML = `
+    <div class="combo-big hidden" id="comboBig"></div>
+    <div class="judge-pop" id="judgePop"></div>
+    ${LANES.map(l => `
+      <div class="lane lane-${l.id}" data-lane="${l.id}">
+        <div class="hit-line"></div>
+        <div class="receptor" id="receptor-${l.id}">${l.emoji}</div>
+      </div>`).join('')}
+  `;
+  document.getElementById('tapRow').innerHTML = LANES.map(l => `
+    <button class="tap-btn lane-${l.id}" data-lane="${l.id}">
+      <span class="emo">${l.emoji}</span>
+      <span class="nm">${l.name}</span>
+      <span class="nm">[${l.key}]</span>
     </button>`).join('');
-  container.querySelectorAll('[data-character]').forEach(btn => btn.onclick = () => { state.selectedCharacter = btn.dataset.character; persist(); render(); });
+  document.querySelectorAll('.tap-btn').forEach(btn => {
+    const lane = Number(btn.dataset.lane);
+    const fire = ev => { ev.preventDefault(); attemptHit(lane); btn.classList.add('active'); setTimeout(()=>btn.classList.remove('active'),100); };
+    btn.addEventListener('pointerdown', fire);
+  });
+
+  updateHud();
+  showScreen('play');
+  loop();
 }
 
-function renderStats(){
-  const stats = calcStats();
-  const defs = [
-    ['STR', stats.str, 'orange'],['VIT', stats.vit, 'gold'],['END', stats.end, 'green'],['AGI', stats.agi, 'blue'],['MEN', stats.men, 'purple'],['POWER', stats.power, 'red']
-  ];
-  document.getElementById('statsGrid').innerHTML = defs.map(([label,val,accent]) => `<div class="stat ${accent}"><label>${label}</label><strong>${val}</strong></div>`).join('');
-}
+function loop(){
+  rafId = requestAnimationFrame(loop);
+  if(!game || game.paused || game.finished) return;
+  const elapsed = Audio.now() - game.startTime;
 
-function renderEquipment(){
-  const list = document.getElementById('equipList');
-  list.innerHTML = EQUIPMENT.map(item => {
-    const active = state.equipped[item.slot] === item.id;
-    const unlocked = canEquip(item);
-    return `
-      <button class="equip-item ${active ? 'active' : ''}" data-equip="${item.id}">
-        <div class="equip-main">
-          <strong>${item.name}<span class="slot">${item.slot}</span></strong>
-          <p>${formatBonus(item.bonus)}</p>
-          <p class="small-note">${unlocked ? '언락 완료' : '언락 조건: ' + item.unlock}</p>
-        </div>
-        <div class="state">${active ? '장착중' : (unlocked ? '장착' : '잠김')}</div>
-      </button>`;
-  }).join('');
-  list.querySelectorAll('[data-equip]').forEach(btn => btn.onclick = () => toggleEquip(btn.dataset.equip));
-}
-
-function renderWods(){
-  const list = document.getElementById('wodList');
-  const items = [...state.wods].sort((a,b)=>b.date.localeCompare(a.date));
-  if(!items.length){ list.innerHTML = '<div class="record"><div><strong>아직 기록 없음</strong><p>첫 WOD를 저장해봐.</p></div></div>'; return; }
-  list.innerHTML = items.map(item => `
-    <div class="record">
-      <div>
-        <strong>${item.name}</strong>
-        <p>${item.type} · ${item.score}${item.memo ? ' · ' + item.memo : ''}</p>
-        <p>${item.date}</p>
-      </div>
-      <div class="record-meta">
-        <span class="pill ${item.verified ? 'ok' : ''}">${item.verified ? '코치 인증' : '일반 기록'}</span>
-        <span>+${item.xp} XP</span>
-      </div>
-    </div>`).join('');
-}
-
-function renderPrs(){
-  const list = document.getElementById('prList');
-  if(!state.prs.length){ list.innerHTML = '<div class="mini"><strong>PR이 아직 없어</strong><small>등록하면 경험치가 크게 올라가.</small></div>'; return; }
-  list.innerHTML = [...state.prs].reverse().map(item => `<div class="mini"><strong>${item.event}</strong><span>${item.record}</span><small>${item.date}</small></div>`).join('');
-}
-
-function renderInbody(){
-  const current = latestInbody();
-  const previous = prevInbody();
-  const latestBox = document.getElementById('latestInbody');
-  if(!current){ latestBox.innerHTML = '<div class="mini"><strong>인바디 기록 없음</strong><small>측정값을 입력하면 능력치가 계산돼.</small></div>'; }
-  else {
-    latestBox.innerHTML = `
-      <div class="mini"><strong>체중</strong><span>${current.weight}kg</span><small>${diff(current, previous, 'weight')}</small></div>
-      <div class="mini"><strong>골격근량</strong><span>${current.muscle}kg</span><small>${diff(current, previous, 'muscle')}</small></div>
-      <div class="mini"><strong>체지방률</strong><span>${current.fatPercent}%</span><small>${diff(current, previous, 'fatPercent')}</small></div>`;
+  while(game.nextIndex < game.chart.notes.length && game.chart.notes[game.nextIndex].time - game.travel <= elapsed){
+    spawnNote(game.chart.notes[game.nextIndex]);
+    game.nextIndex++;
   }
-  const list = document.getElementById('inbodyList');
-  list.innerHTML = [...state.inbodyRecords].sort((a,b)=>b.date.localeCompare(a.date)).map(row => `
-    <div class="record">
-      <div><strong>${row.date}</strong><p>${row.weight}kg · 근육 ${row.muscle}kg · 지방 ${row.fatPercent}%</p></div>
-      <div class="record-meta"><span class="pill ok">스탯 반영</span></div>
+
+  const stageEl = document.getElementById('gameStage');
+  const hitLineY = stageEl.clientHeight - 66;
+
+  for(let i = game.activeNotes.length-1; i>=0; i--){
+    const n = game.activeNotes[i];
+    const progress = (elapsed - n.spawnTime) / game.travel;
+    if(!n.judged){
+      n.el.style.top = `${Math.min(progress,1.25)*hitLineY - 20}px`;
+      if(elapsed - n.time > MISS_WINDOW){
+        judgeNote(n, 'MISS');
+      }
+    }
+    if(n.removeAt && elapsed > n.removeAt){
+      n.el.remove();
+      game.activeNotes.splice(i,1);
+    }
+  }
+
+  document.getElementById('progressFill').style.width = `${Math.min(100, elapsed/game.chart.duration*100)}%`;
+
+  if(elapsed > game.chart.duration + game.travel + 0.3 && !game.finished){
+    finishSong();
+  }
+}
+
+function spawnNote(noteDef){
+  const stageEl = document.getElementById('gameStage');
+  const laneEl = stageEl.querySelector(`.lane[data-lane="${noteDef.lane}"]`);
+  const el = document.createElement('div');
+  el.className = `note lane-${noteDef.lane}`;
+  el.textContent = LANES[noteDef.lane].emoji;
+  laneEl.appendChild(el);
+  const active = { ...noteDef, el, spawnTime: noteDef.time - game.travel, removeAt:null };
+  game.activeNotes.push(active);
+}
+
+function attemptHit(lane){
+  if(!game || game.finished || game.paused) return;
+  const elapsed = Audio.now() - game.startTime;
+  let best=null, bestDiff=Infinity;
+  for(const n of game.activeNotes){
+    if(n.lane !== lane || n.judged) continue;
+    const diff = Math.abs(n.time - elapsed);
+    if(diff < bestDiff){ bestDiff = diff; best = n; }
+  }
+  flashLane(lane);
+  if(best && bestDiff <= GOOD_WINDOW){
+    const grade = bestDiff <= PERFECT_WINDOW ? 'PERFECT' : 'GOOD';
+    judgeNote(best, grade);
+  }
+}
+
+function judgeNote(note, grade){
+  note.judged = true;
+  note.removeAt = (Audio.now() - game.startTime) + 0.12;
+  note.el.style.opacity = '0';
+  note.el.style.transition = 'opacity .12s ease';
+
+  game.counts[grade] = (game.counts[grade]||0) + 1;
+  if(grade === 'MISS'){
+    game.combo = 0;
+    game.hp = Math.max(0, game.hp - 8);
+    Audio.missSound();
+  } else {
+    game.combo++;
+    game.maxCombo = Math.max(game.maxCombo, game.combo);
+    game.hp = Math.min(100, game.hp + (grade==='PERFECT' ? 1 : 0));
+    const base = grade === 'PERFECT' ? 300 : 100;
+    game.score += base + game.combo*2;
+    Audio.hitSound(note.lane, grade);
+    pulseReceptor(note.lane);
+  }
+  showJudgePop(grade);
+  updateHud();
+  if(game.hp <= 0) failSong();
+}
+
+function flashLane(lane){
+  const laneEl = document.querySelector(`.lane[data-lane="${lane}"]`);
+  if(!laneEl) return;
+  laneEl.classList.add('flash');
+  setTimeout(()=>laneEl.classList.remove('flash'), 100);
+}
+function pulseReceptor(lane){
+  const r = document.getElementById(`receptor-${lane}`);
+  if(!r) return;
+  r.classList.add('hit');
+  setTimeout(()=>r.classList.remove('hit'), 90);
+}
+function showJudgePop(grade){
+  const el = document.getElementById('judgePop');
+  if(!el) return;
+  el.textContent = grade;
+  el.className = `judge-pop show ${grade}`;
+  clearTimeout(showJudgePop._t);
+  showJudgePop._t = setTimeout(()=> el.classList.remove('show'), 260);
+
+  const cb = document.getElementById('comboBig');
+  if(game.combo >= 5){
+    cb.textContent = `${game.combo} COMBO`;
+    cb.classList.remove('hidden');
+  } else {
+    cb.classList.add('hidden');
+  }
+}
+
+function updateHud(){
+  document.getElementById('playScore').textContent = game.score;
+  document.getElementById('playCombo').textContent = game.combo > 0 ? `${game.combo} COMBO` : '';
+  document.getElementById('hpFill').style.width = `${game.hp}%`;
+}
+
+function failSong(){
+  game.failed = true;
+  finishSong();
+}
+
+function finishSong(){
+  if(game.finished) return;
+  game.finished = true;
+  cancelAnimationFrame(rafId);
+  Audio.close();
+
+  const total = game.counts.PERFECT + game.counts.GOOD + game.counts.MISS;
+  const maxScorePer = 300;
+  const earned = game.counts.PERFECT*300 + game.counts.GOOD*100;
+  const acc = total ? earned / (total*maxScorePer) * 100 : 0;
+
+  let rank = 'D';
+  if(game.failed) rank = 'F';
+  else if(acc >= 95) rank = 'S';
+  else if(acc >= 88) rank = 'A';
+  else if(acc >= 75) rank = 'B';
+  else if(acc >= 60) rank = 'C';
+
+  const xpGained = Math.max(10, Math.round(game.score/50));
+  meta.totalXp += xpGained;
+  const key = game.song.id;
+  const prevBest = meta.best[key];
+  if(!prevBest || game.score > prevBest.score){
+    meta.best[key] = { score:game.score, rank };
+  }
+  saveMeta();
+
+  document.getElementById('resultRank').textContent = rank;
+  document.getElementById('resultSub').textContent = game.failed
+    ? `${game.song.name} · 실패 (HP 소진)`
+    : `${game.song.name} · 정확도 ${acc.toFixed(1)}%`;
+  document.getElementById('resultScore').textContent = game.score;
+  document.getElementById('resultCombo').textContent = game.maxCombo;
+  document.getElementById('resultXp').textContent = `+${xpGained} XP`;
+  document.getElementById('judgeBreakdown').innerHTML = `
+    <div class="jb-row"><span>PERFECT</span><strong>${game.counts.PERFECT||0}</strong></div>
+    <div class="jb-row"><span>GOOD</span><strong>${game.counts.GOOD||0}</strong></div>
+    <div class="jb-row"><span>MISS</span><strong>${game.counts.MISS||0}</strong></div>
+  `;
+
+  renderLevelChip();
+  showScreen('result');
+}
+
+/* ============== 화면 전환 / 렌더 ============== */
+function showScreen(name){
+  document.getElementById('screen-menu').classList.toggle('hidden', name !== 'menu');
+  document.getElementById('screen-play').classList.toggle('hidden', name !== 'play');
+  document.getElementById('screen-result').classList.toggle('hidden', name !== 'result');
+}
+
+function renderLevelChip(){
+  document.getElementById('levelChip').textContent = `LV ${levelFromXp(meta.totalXp)}`;
+}
+
+function renderLegend(){
+  document.getElementById('legend').innerHTML = LANES.map(l => `
+    <div class="legend-item">
+      <div class="emo">${l.emoji}</div>
+      <div class="nm">${l.name}</div>
+      <div class="ky lane-${l.id}" style="background:rgba(255,255,255,.08)">${l.key}</div>
     </div>`).join('');
 }
 
-function calcRankingScore(me=false){
-  const xp = calcXp();
-  return me ? xp : 0;
-}
-function renderRanking(){
-  const meScore = calcRankingScore(true);
-  const rivals = [
-    {name:'RX Tiger', score:1560, badge:'1위권'},
-    {name:'Burpee Fox', score:1380, badge:'라이벌'},
-    {name:'AMRAP Bear', score:1240, badge:'꾸준형'},
-  ];
-  const all = [{name: state.nickname || '네 캐릭터', score: meScore, badge:'상승중', me:true}, ...rivals].sort((a,b)=>b.score-a.score);
-  document.getElementById('rankList').innerHTML = all.map((u,idx)=>`<div class="rank ${u.me ? 'me' : ''}"><div class="rank-left"><div class="rank-no">${idx+1}</div><div><strong>${u.name}</strong><p>${u.badge}</p></div></div><div class="rank-score">${u.score}</div></div>`).join('');
-}
-
-function render(){
-  renderHeader(); renderHero(); renderCharacters(); renderStats(); renderEquipment(); renderWods(); renderPrs(); renderInbody(); renderRanking();
-  document.getElementById('codeExample').textContent = COACH_CODES[0];
-}
-
-function wireEvents(){
-  document.querySelectorAll('.tab').forEach(btn => btn.onclick = () => {
-    document.querySelectorAll('.tab').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(v => v.classList.add('hidden'));
-    btn.classList.add('active');
-    document.getElementById(`panel-${btn.dataset.tab}`).classList.remove('hidden');
-  });
-  document.getElementById('nickname').addEventListener('change', e => { state.nickname = e.target.value.trim() || 'WOD Hunter'; persist(); render(); });
-  document.getElementById('wodForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const code = String(form.get('code') || '').trim();
-    const verified = code && COACH_CODES.includes(code);
-    const invalidAttempt = code && !verified;
-    state.wods.push({
-      id: Date.now(),
-      name: String(form.get('name')).trim(),
-      type: String(form.get('type')),
-      score: String(form.get('score')).trim(),
-      memo: String(form.get('memo') || '').trim(),
-      verified,
-      xp: verified ? 80 : 30,
-      date: new Date().toISOString().slice(0,10)
-    });
-    e.currentTarget.reset();
-    persist(); render();
-    showToast(verified ? '코치 인증 완료! +80 XP' : invalidAttempt ? '코드 불일치 · 일반 기록으로 저장! +30 XP' : '일반 기록 저장! +30 XP');
-  });
-  document.getElementById('prForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    state.prs.push({ event:String(form.get('event')).trim(), record:String(form.get('record')).trim(), date:new Date().toISOString().slice(0,10) });
-    e.currentTarget.reset();
-    persist(); render(); showToast('신규 PR 등록! +100 XP');
-  });
-  document.getElementById('inbodyForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    state.inbodyRecords.push({
-      date:String(form.get('date')),
-      weight:Number(form.get('weight')),
-      muscle:Number(form.get('muscle')),
-      fatPercent:Number(form.get('fatPercent')),
-    });
-    state.inbodyRecords.sort((a,b)=>a.date.localeCompare(b.date));
-    persist(); render(); showToast('인바디가 반영되어 능력치가 업데이트됐어!');
-  });
-  document.getElementById('csvUpload').addEventListener('change', async e => {
-    const file = e.target.files?.[0]; if(!file) return;
-    const text = await file.text();
-    const rows = text.trim().split(/\r?\n/).map(v => v.split(',').map(s => s.trim()));
-    const headers = rows.shift().map(v => v.toLowerCase());
-    const idx = {date: headers.indexOf('date'), weight: headers.indexOf('weight'), muscle: headers.indexOf('muscle'), fatPercent: headers.indexOf('fatpercent')};
-    if(Object.values(idx).some(v => v < 0)){ showToast('CSV 헤더를 확인해줘: date,weight,muscle,fatPercent'); e.target.value = ''; return; }
-    rows.forEach(r => {
-      state.inbodyRecords.push({date:r[idx.date], weight:Number(r[idx.weight]), muscle:Number(r[idx.muscle]), fatPercent:Number(r[idx.fatPercent])});
-    });
-    state.inbodyRecords.sort((a,b)=>a.date.localeCompare(b.date));
-    persist(); render(); e.target.value = ''; showToast('CSV 업로드 완료!');
-  });
-  document.getElementById('imageUpload').addEventListener('change', e => {
-    if(e.target.files?.[0]) showToast('사진 업로드 UI만 준비되어 있어. OCR은 다음 버전에 연결 가능!');
-    e.target.value = '';
+function renderSongList(){
+  document.getElementById('songList').innerHTML = SONGS.map(s => {
+    const best = meta.best[s.id];
+    return `
+    <div class="song-card">
+      <div class="song-info">
+        <strong>${s.name}</strong>
+        <p>BPM ${s.bpm} · ${Math.round(s.target)}초</p>
+        <div class="stars">${'★'.repeat(s.stars)}${'☆'.repeat(4-s.stars)}</div>
+        ${best ? `<div class="best">BEST ${best.score} · RANK ${best.rank}</div>` : ''}
+      </div>
+      <button class="play-btn" data-song="${s.id}">PLAY</button>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[data-song]').forEach(btn => {
+    btn.onclick = () => {
+      const song = SONGS.find(s => s.id === btn.dataset.song);
+      startSong(song);
+    };
   });
 }
 
-render(); wireEvents();
+/* ============== 이벤트 ============== */
+const KEY_TO_LANE = {};
+LANES.forEach(l => KEY_TO_LANE[l.key.toLowerCase()] = l.id);
 
-autoUnlockStarterGear();
-function autoUnlockStarterGear(){
-  if(state.prs.length >= 1 && !state.equipped['허리']) state.equipped['허리'] = 'belt';
-  if(state.wods.length >= 5 && !state.equipped['손']) state.equipped['손'] = 'grips';
-  if(state.wods.length >= 8 && !state.equipped['신발']) state.equipped['신발'] = 'shoes';
-  persist(); render();
-}
+document.addEventListener('keydown', e => {
+  if(e.repeat) return;
+  const lane = KEY_TO_LANE[e.key.toLowerCase()];
+  if(lane === undefined) return;
+  if(document.getElementById('screen-play').classList.contains('hidden')) return;
+  attemptHit(lane);
+});
+
+document.getElementById('pauseBtn').addEventListener('click', () => {
+  if(!game || game.finished) return;
+  game.paused = !game.paused;
+  document.getElementById('pauseBtn').textContent = game.paused ? '계속하기' : '일시정지';
+  if(game.paused) Audio.ctx.suspend(); else Audio.ctx.resume();
+});
+
+document.getElementById('exitBtn').addEventListener('click', () => {
+  if(!game) return;
+  cancelAnimationFrame(rafId);
+  Audio.close();
+  game = null;
+  showScreen('menu');
+});
+
+document.getElementById('retryBtn').addEventListener('click', () => {
+  const song = game ? game.song : SONGS[0];
+  startSong(song);
+});
+document.getElementById('menuBtn').addEventListener('click', () => {
+  renderSongList();
+  showScreen('menu');
+});
+
+/* ============== 초기화 ============== */
+renderLegend();
+renderSongList();
+renderLevelChip();
+showScreen('menu');
 </script>
 </body>
 </html>
