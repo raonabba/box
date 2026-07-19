@@ -68,23 +68,8 @@
   .stage-banner .move-now .emo{font-size:22px}
   .stage-banner .rep-count{font-size:13px;color:var(--gold);font-weight:800}
 
-  .game-stage{position:relative;height:min(50vh,380px);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.2));border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow)}
-  .floor{position:absolute;left:0;right:0;bottom:56px;height:2px;background:rgba(255,255,255,.18)}
-  .hit-ring{position:absolute;left:50%;bottom:50px;width:76px;height:18px;margin-left:-38px;border-radius:50%;background:radial-gradient(circle, rgba(247,191,79,.55), rgba(247,191,79,0) 72%);opacity:.15;transform:scale(1)}
-  .char-outer{position:absolute;left:50%;bottom:56px;width:100px;margin-left:-50px}
-  .char-upper{position:relative}
-  .char-head{width:32px;height:32px;border-radius:50%;background:#ffd8a8;position:absolute;left:50%;margin-left:-16px;top:0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-  .char-torso{width:44px;height:52px;border-radius:20px 20px 24px 24px;position:absolute;left:50%;margin-left:-22px;top:28px;background:linear-gradient(160deg,#6ea6ff,#3a6bd4);transition:background .2s ease}
-  .char-arm{width:11px;height:42px;border-radius:8px;background:#ffd8a8;position:absolute;top:32px;transform-origin:top center}
-  .char-arm.left{left:50%;margin-left:-32px}
-  .char-arm.right{left:50%;margin-left:21px}
-  .char-leg{width:15px;height:46px;border-radius:8px;background:#1c2534;position:absolute;top:76px;transform-origin:bottom center}
-  .char-leg.left{left:50%;margin-left:-16px}
-  .char-leg.right{left:50%;margin-left:1px}
-  .char-torso.move-squat{background:linear-gradient(160deg,#8fbaff,var(--blue))}
-  .char-torso.move-burpee{background:linear-gradient(160deg,#ffab6b,var(--orange))}
-  .char-torso.move-boxjump{background:linear-gradient(160deg,#6be0ac,var(--green))}
-  .char-torso.move-snatch{background:linear-gradient(160deg,#ffd685,var(--gold))}
+  .game-stage{position:relative;height:min(58vh,460px);border-radius:22px;background:radial-gradient(ellipse at 50% 82%, rgba(110,166,255,.14), transparent 60%), linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.22));border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+  .char-svg{width:100%;height:100%}
   .judge-pop{position:absolute;left:0;right:0;top:14px;text-align:center;font-size:20px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .12s ease, transform .12s ease;transform:translateY(6px)}
   .judge-pop.show{opacity:1;transform:translateY(-6px)}
   .judge-pop.PERFECT{color:var(--gold)} .judge-pop.GREAT{color:var(--green)} .judge-pop.GOOD{color:var(--blue)} .judge-pop.MISS{color:var(--red)}
@@ -129,7 +114,7 @@
     <div class="panel">
       <div class="panel-head"><h3>플레이 방법</h3><span class="hint">탭 타이밍</span></div>
       <div class="how">
-        <p>캐릭터가 박자에 맞춰 동작을 반복해. <b>가장 낮은 자세(바닥)에 닿는 순간</b> 화면을 탭하거나 스페이스바를 눌러줘.</p>
+        <p>캐릭터가 박자에 맞춰 실제 동작 자세로 반복 수행해. <b>가장 낮은 자세(바닥)에 닿는 순간</b> 화면을 탭하거나 스페이스바를 눌러줘.</p>
         <p>WOD는 여러 동작을 이어붙인 구성이라, <b>한 번에 한 동작씩</b> 순서대로 등장해.</p>
       </div>
       <div class="legend" id="legend"></div>
@@ -165,18 +150,49 @@
       <div class="stage-flash" id="stageFlash"></div>
       <div class="combo-big hidden" id="comboBig"></div>
       <div class="judge-pop" id="judgePop"></div>
-      <div class="floor"></div>
-      <div class="hit-ring" id="hitRing"></div>
-      <div class="char-outer" id="charOuter">
-        <div class="char-upper" id="charUpper">
-          <div class="char-arm left" id="armLeft"></div>
-          <div class="char-arm right" id="armRight"></div>
-          <div class="char-head"></div>
-          <div class="char-torso" id="charTorso"></div>
-        </div>
-        <div class="char-leg left" id="legLeft"></div>
-        <div class="char-leg right" id="legRight"></div>
-      </div>
+      <svg class="char-svg" id="charSvg" viewBox="0 24 280 322" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- gradientUnits="userSpaceOnUse"로 고정: 캐릭터 각 부위가 회전/수평/수직이 되어도
+               objectBoundingBox 그라디언트가 깨지지 않고, 하나의 광원 방향이 항상 유지됨 -->
+          <linearGradient id="gradSkin" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="230" y2="340">
+            <stop offset="0%" stop-color="#ffe3bd"/>
+            <stop offset="100%" stop-color="#e8a86c"/>
+          </linearGradient>
+          <linearGradient id="gradShorts" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="230" y2="340">
+            <stop offset="0%" stop-color="#3f4864"/>
+            <stop offset="100%" stop-color="#171d2e"/>
+          </linearGradient>
+          <linearGradient id="gradShirt" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="230" y2="340">
+            <stop id="shirtStop0" offset="0%" stop-color="#8fbaff"/>
+            <stop id="shirtStop1" offset="100%" stop-color="#3a6bd4"/>
+          </linearGradient>
+          <linearGradient id="gradShoe" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="230" y2="340">
+            <stop offset="0%" stop-color="#333c52"/>
+            <stop offset="100%" stop-color="#11151f"/>
+          </linearGradient>
+          <linearGradient id="gradBox" gradientUnits="userSpaceOnUse" x1="96" y1="280" x2="204" y2="340">
+            <stop offset="0%" stop-color="#4a5674"/>
+            <stop offset="100%" stop-color="#232c40"/>
+          </linearGradient>
+        </defs>
+        <ellipse id="groundShadow" cx="150" cy="326" rx="52" ry="10" fill="rgba(0,0,0,.4)"/>
+        <rect id="boxPlatform" x="96" y="280" width="108" height="60" rx="8" fill="url(#gradBox)" stroke="rgba(255,255,255,.12)" opacity="0"/>
+        <g id="figure" stroke-linecap="round" fill="none">
+          <line id="legBackThigh" stroke="url(#gradShorts)" stroke-width="26" opacity=".6"/>
+          <line id="legBackShin" stroke="url(#gradSkin)" stroke-width="18" opacity=".6"/>
+          <ellipse id="legBackShoe" rx="15" ry="8" fill="url(#gradShoe)" opacity=".6"/>
+          <line id="armBackUpper" stroke="url(#gradShirt)" stroke-width="15" opacity=".75"/>
+          <line id="armBackFore" stroke="url(#gradSkin)" stroke-width="13" opacity=".75"/>
+          <line id="torsoLine" stroke="url(#gradShirt)" stroke-width="34"/>
+          <line id="legFrontThigh" stroke="url(#gradShorts)" stroke-width="27"/>
+          <line id="legFrontShin" stroke="url(#gradSkin)" stroke-width="19"/>
+          <ellipse id="legFrontShoe" rx="17" ry="9" fill="url(#gradShoe)"/>
+          <circle id="headCircle" r="24" fill="url(#gradSkin)"/>
+          <circle id="headShine" r="6" fill="rgba(255,255,255,.4)"/>
+          <line id="armFrontUpper" stroke="url(#gradShirt)" stroke-width="16"/>
+          <line id="armFrontFore" stroke="url(#gradSkin)" stroke-width="14"/>
+        </g>
+      </svg>
       <div class="tap-hint">화면을 탭해도 판정돼</div>
     </div>
 
@@ -214,10 +230,10 @@
 <script>
 /* ============== 데이터 ============== */
 const MOVES = {
-  squat:   { name:'스쿼트',   emoji:'🦵' },
-  burpee:  { name:'버피',     emoji:'🔥' },
-  boxjump: { name:'박스점프', emoji:'⬆️' },
-  snatch:  { name:'스내치',   emoji:'🏋️' },
+  squat:   { name:'스쿼트',   emoji:'🦵', color0:'#8fbaff', color1:'#3a6bd4' },
+  burpee:  { name:'버피',     emoji:'🔥', color0:'#ffab6b', color1:'#c85a1f' },
+  boxjump: { name:'박스점프', emoji:'⬆️', color0:'#6be0ac', color1:'#1f9d6b' },
+  snatch:  { name:'스내치',   emoji:'🏋️', color0:'#ffd685', color1:'#d69420' },
 };
 
 const WODS = [
@@ -349,48 +365,135 @@ function buildChart(wod){
   return { reps, duration: t };
 }
 
-/* ============== 캐릭터 포즈 ============== */
-function poseFor(move, progress){
-  const p = Math.min(Math.max(progress, 0), 1);
-  const depth = Math.sin(p*Math.PI);
-  let legScale, torsoY, rot=0, armAngle=0, armY=0, hop=0;
-  if(move === 'burpee'){
-    legScale = 1 - depth*0.30;
-    torsoY = (1-legScale)*46 + depth*14;
-    rot = depth*24;
-    armAngle = -depth*110;
-    armY = depth*8;
-  } else if(move === 'boxjump'){
-    legScale = 1 - depth*0.30;
-    hop = p > 0.55 ? Math.sin(Math.min((p-0.55)/0.45,1)*Math.PI) : 0;
-    torsoY = (1-legScale)*46;
-    armAngle = -depth*60 + hop*50;
-    armY = -hop*6;
-  } else if(move === 'snatch'){
-    legScale = 1 - depth*0.32;
-    const extend = p > 0.6 ? Math.sin(Math.min((p-0.6)/0.4,1)*Math.PI) : 0;
-    torsoY = (1-legScale)*46 - extend*8;
-    rot = depth*12 - extend*8;
-    armAngle = -depth*35 - extend*140;
-    armY = -extend*16;
-  } else {
-    legScale = 1 - depth*0.34;
-    torsoY = (1-legScale)*46;
-    armAngle = -depth*55;
+/* ============== 캐릭터 리그 (관절 기반 옆모습) ============== */
+const RIG = { footX:150, groundY:320, thigh:54, shin:54, torso:76, upperArm:42, foreArm:38, headR:24, boxDrop:46 };
+const REST = { thigh:0, shin:0, torso:0, armA:0, armAElbow:0, armB:0, armBElbow:0, airborne:0, box:0 };
+
+const MOVE_FRAMES = {
+  squat: [
+    { p:0.00, ...REST },
+    { p:0.50, thigh:-90, shin:14, torso:20, armA:92, armB:92, armAElbow:0, armBElbow:0 },
+    { p:1.00, ...REST },
+  ],
+  burpee: [
+    { p:0.00, ...REST },
+    { p:0.45, thigh:-76, shin:-84, torso:80, armA:64, armB:56, armAElbow:-18, armBElbow:-18 },
+    { p:0.72, thigh:0, shin:0, torso:0, armA:172, armB:164, airborne:-28 },
+    { p:1.00, ...REST },
+  ],
+  boxjump: [
+    { p:0.00, ...REST, armA:-22, armB:-22 },
+    { p:0.42, thigh:-48, shin:28, torso:16, armA:-42, armB:-42 },
+    { p:0.72, thigh:0, shin:0, torso:0, armA:52, armB:44, airborne:-46, box:1 },
+    { p:1.00, ...REST, box:0 },
+  ],
+  snatch: [
+    { p:0.00, ...REST },
+    { p:0.50, thigh:-18, shin:6, torso:42, armA:10, armB:-8 },
+    { p:0.80, thigh:0, shin:0, torso:-6, armA:172, armB:16, airborne:-4 },
+    { p:1.00, ...REST },
+  ],
+};
+
+function interpFrames(frames, p){
+  p = Math.min(Math.max(p,0),1);
+  for(let i=0;i<frames.length-1;i++){
+    const A = frames[i], B = frames[i+1];
+    if(p >= A.p && p <= B.p){
+      const t = (B.p - A.p) > 0 ? (p - A.p)/(B.p - A.p) : 0;
+      const out = {};
+      Object.keys(REST).forEach(k => { out[k] = (A[k]??REST[k]) + ((B[k]??REST[k]) - (A[k]??REST[k]))*t; });
+      return out;
+    }
   }
-  return { depth, legScale, torsoY, rot, armAngle, armY, hop };
+  return frames[frames.length-1];
 }
 
-function applyPose(pose){
-  document.getElementById('charOuter').style.transform = `translateY(${-(pose.hop||0)*30}px)`;
-  document.getElementById('charUpper').style.transform = `translateY(${pose.torsoY}px) rotate(${pose.rot}deg)`;
-  document.getElementById('legLeft').style.transform = `scaleY(${pose.legScale})`;
-  document.getElementById('legRight').style.transform = `scaleY(${pose.legScale})`;
-  document.getElementById('armLeft').style.transform = `translateY(${pose.torsoY + (pose.armY||0)}px) rotate(${pose.armAngle}deg)`;
-  document.getElementById('armRight').style.transform = `translateY(${pose.torsoY + (pose.armY||0)}px) rotate(${-pose.armAngle}deg)`;
-  const ring = document.getElementById('hitRing');
-  ring.style.opacity = 0.15 + pose.depth*0.65;
-  ring.style.transform = `scale(${1 + pose.depth*0.5})`;
+function poseFor(move, progress){
+  const frames = MOVE_FRAMES[move] || MOVE_FRAMES.squat;
+  const params = interpFrames(frames, progress);
+  const depth = Math.sin(Math.min(Math.max(progress,0),1) * Math.PI);
+  return { ...params, depth };
+}
+
+function toRad(d){ return d*Math.PI/180; }
+function setLine(id, x1,y1,x2,y2){ const el = document.getElementById(id); el.setAttribute('x1',x1); el.setAttribute('y1',y1); el.setAttribute('x2',x2); el.setAttribute('y2',y2); }
+function setEllipse(id, cx,cy){ const el = document.getElementById(id); el.setAttribute('cx',cx); el.setAttribute('cy',cy); }
+
+function drawCharacter(pose){
+  const R = RIG;
+  const air = pose.airborne || 0;
+  const gY = R.groundY + air;
+
+  // 다리: 발(고정) -> 무릎 -> 엉덩이 순서로 계산
+  const shinW = pose.shin;
+  const kneeX = R.footX + R.shin*Math.sin(toRad(shinW));
+  const kneeY = gY - R.shin*Math.cos(toRad(shinW));
+  const thighW = pose.thigh;
+  const hipX = kneeX + R.thigh*Math.sin(toRad(thighW));
+  const hipY = kneeY - R.thigh*Math.cos(toRad(thighW));
+
+  // 몸통: 엉덩이 -> 어깨
+  const shoulderX = hipX + R.torso*Math.sin(toRad(pose.torso));
+  const shoulderY = hipY - R.torso*Math.cos(toRad(pose.torso));
+
+  // 머리
+  const headDist = R.headR + 8;
+  const headCX = shoulderX + headDist*Math.sin(toRad(pose.torso));
+  const headCY = shoulderY - headDist*Math.cos(toRad(pose.torso));
+
+  // 팔 A(앞) / B(뒤): 어깨 -> 팔꿈치 -> 손
+  function armPoints(worldA, elbowRel){
+    const elbowX = shoulderX + R.upperArm*Math.sin(toRad(worldA));
+    const elbowY = shoulderY + R.upperArm*Math.cos(toRad(worldA));
+    const foreW = worldA + elbowRel;
+    const handX = elbowX + R.foreArm*Math.sin(toRad(foreW));
+    const handY = elbowY + R.foreArm*Math.cos(toRad(foreW));
+    return { elbowX, elbowY, handX, handY };
+  }
+  const armA = armPoints(pose.armA, pose.armAElbow);
+  const armB = armPoints(pose.armB, pose.armBElbow);
+
+  const backOffset = 10;
+  const shinDir = Math.sin(toRad(shinW));
+  setLine('legBackThigh', hipX-backOffset, hipY, kneeX-backOffset, kneeY);
+  setLine('legBackShin', kneeX-backOffset, kneeY, R.footX-backOffset, gY);
+  setEllipse('legBackShoe', R.footX-backOffset+shinDir*10, gY+2);
+
+  setLine('legFrontThigh', hipX+backOffset*0.4, hipY, kneeX+backOffset*0.4, kneeY);
+  setLine('legFrontShin', kneeX+backOffset*0.4, kneeY, R.footX+backOffset*0.4, gY);
+  setEllipse('legFrontShoe', R.footX+backOffset*0.4+shinDir*12, gY+2);
+
+  setLine('torsoLine', hipX, hipY, shoulderX, shoulderY);
+
+  setLine('armBackUpper', shoulderX, shoulderY, armB.elbowX, armB.elbowY);
+  setLine('armBackFore', armB.elbowX, armB.elbowY, armB.handX, armB.handY);
+  setLine('armFrontUpper', shoulderX, shoulderY, armA.elbowX, armA.elbowY);
+  setLine('armFrontFore', armA.elbowX, armA.elbowY, armA.handX, armA.handY);
+
+  const head = document.getElementById('headCircle');
+  head.setAttribute('cx', headCX); head.setAttribute('cy', headCY);
+  const shine = document.getElementById('headShine');
+  shine.setAttribute('cx', headCX-8); shine.setAttribute('cy', headCY-9);
+
+  const shadow = document.getElementById('groundShadow');
+  const shrink = Math.min(1, Math.abs(air)/50);
+  shadow.setAttribute('cx', R.footX);
+  shadow.setAttribute('rx', 52*(1-shrink*0.55));
+  shadow.setAttribute('opacity', 0.4 - shrink*0.28);
+
+  const box = document.getElementById('boxPlatform');
+  box.setAttribute('opacity', pose.box || 0);
+  box.setAttribute('x', R.footX - 54);
+  box.setAttribute('y', R.groundY - R.boxDrop);
+  box.setAttribute('width', 108);
+  box.setAttribute('height', R.boxDrop + 20);
+}
+
+function setTorsoColor(move){
+  const def = MOVES[move] || MOVES.squat;
+  document.getElementById('shirtStop0').setAttribute('stop-color', def.color0);
+  document.getElementById('shirtStop1').setAttribute('stop-color', def.color1);
 }
 
 /* ============== 상태 ============== */
@@ -415,9 +518,10 @@ function startSong(wod){
 
   document.getElementById('playSongName').textContent = wod.name;
   document.getElementById('playSongMeta').textContent = `BPM ${wod.bpm} · ${'★'.repeat(wod.stars)}${'☆'.repeat(4-wod.stars)}`;
-  document.getElementById('charTorso').className = 'char-torso';
   updateHud();
-  updateMoveBanner(game.chart.reps[0] ? game.chart.reps[0].move : 'squat', 0, game.chart.reps[0] ? game.chart.reps[0].stationReps : 0);
+  const first = game.chart.reps[0];
+  updateMoveBanner(first ? first.move : 'squat', 0, first ? first.stationReps : 0);
+  drawCharacter(poseFor(first ? first.move : 'squat', 0));
   showScreen('play');
   loop();
 }
@@ -436,14 +540,14 @@ function loop(){
   const rep = game.chart.reps[game.nextIndex];
   if(rep){
     const progress = (elapsed - rep.repStart) / rep.repDur;
-    applyPose(poseFor(rep.move, progress));
+    drawCharacter(poseFor(rep.move, progress));
     if(game.curStation !== rep.station){
       updateMoveBanner(rep.move, rep.repIndexInStation, rep.stationReps);
     } else {
       document.getElementById('repCount').textContent = `${rep.repIndexInStation+1}/${rep.stationReps}`;
     }
   } else {
-    applyPose(poseFor('squat', 0));
+    drawCharacter(poseFor('squat', 0));
   }
 
   document.getElementById('progressFill').style.width = `${Math.min(100, elapsed/game.chart.duration*100)}%`;
@@ -506,7 +610,7 @@ function updateMoveBanner(move, repIndexInStation, stationReps){
   document.getElementById('moveEmo').textContent = def.emoji;
   document.getElementById('moveName').textContent = def.name;
   document.getElementById('repCount').textContent = `${repIndexInStation+1}/${stationReps}`;
-  document.getElementById('charTorso').className = `char-torso move-${move}`;
+  setTorsoColor(move);
 }
 
 function showJudgePop(grade){
