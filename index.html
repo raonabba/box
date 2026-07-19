@@ -37,10 +37,9 @@
   .how{display:flex;flex-direction:column;gap:8px;font-size:12px;color:#d9e5f8}
   .how b{color:var(--gold)}
   .legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-  .legend-item{border:1px solid var(--line);border-radius:14px;padding:8px 4px;text-align:center;background:rgba(255,255,255,.03)}
-  .legend-item .emo{font-size:20px}
-  .legend-item .nm{font-size:10px;color:var(--muted);margin-top:2px}
-  .legend-item .ky{margin-top:4px;font-size:10px;font-weight:800;padding:2px 6px;border-radius:8px;display:inline-block}
+  .legend-item{border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;background:rgba(255,255,255,.03)}
+  .legend-item .emo{font-size:22px}
+  .legend-item .nm{font-size:10px;color:var(--muted);margin-top:4px}
   .song-list{display:flex;flex-direction:column;gap:10px}
   .song-card{border:1px solid var(--line);background:var(--card2);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px}
   .song-info{flex:1;min-width:0}
@@ -64,32 +63,38 @@
   .progress-bar{height:5px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:12px}
   .progress-bar>div{height:100%;width:0;background:var(--blue);border-radius:inherit}
 
-  .game-stage{position:relative;height:min(56vh,420px);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.18));border:1px solid var(--line);overflow:hidden;display:flex;box-shadow:var(--shadow)}
-  .lane{flex:1;position:relative;border-right:1px solid rgba(255,255,255,.05)}
-  .lane:last-child{border-right:none}
-  .lane.flash{background:rgba(255,255,255,.08)}
-  .hit-line{position:absolute;left:0;right:0;bottom:66px;height:3px;background:rgba(255,255,255,.35)}
-  .receptor{position:absolute;left:50%;bottom:66px;transform:translate(-50%,50%);width:52px;height:52px;border-radius:16px;border:2px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,255,255,.04);transition:transform .08s ease, background .12s ease}
-  .receptor.hit{transform:translate(-50%,50%) scale(1.18)}
-  .note{position:absolute;left:8%;right:8%;height:40px;border-radius:12px;top:-50px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(0,0,0,.35)}
-  .lane-0 .receptor,.lane-0 .note{border-color:var(--blue)} .lane-0 .note{background:linear-gradient(135deg,#3a6bd4,var(--blue))}
-  .lane-1 .receptor,.lane-1 .note{border-color:var(--orange)} .lane-1 .note{background:linear-gradient(135deg,#c85a1f,var(--orange))}
-  .lane-2 .receptor,.lane-2 .note{border-color:var(--green)} .lane-2 .note{background:linear-gradient(135deg,#1f9d6b,var(--green))}
-  .lane-3 .receptor,.lane-3 .note{border-color:var(--gold)} .lane-3 .note{background:linear-gradient(135deg,#d69420,var(--gold))}
-  .judge-pop{position:absolute;left:0;right:0;bottom:130px;text-align:center;font-size:20px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .12s ease, transform .12s ease;transform:translateY(6px)}
+  .stage-banner{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--line);margin-bottom:10px}
+  .stage-banner .move-now{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px}
+  .stage-banner .move-now .emo{font-size:22px}
+  .stage-banner .rep-count{font-size:13px;color:var(--gold);font-weight:800}
+
+  .game-stage{position:relative;height:min(50vh,380px);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(0,0,0,.2));border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow)}
+  .floor{position:absolute;left:0;right:0;bottom:56px;height:2px;background:rgba(255,255,255,.18)}
+  .hit-ring{position:absolute;left:50%;bottom:50px;width:76px;height:18px;margin-left:-38px;border-radius:50%;background:radial-gradient(circle, rgba(247,191,79,.55), rgba(247,191,79,0) 72%);opacity:.15;transform:scale(1)}
+  .char-outer{position:absolute;left:50%;bottom:56px;width:100px;margin-left:-50px}
+  .char-upper{position:relative}
+  .char-head{width:32px;height:32px;border-radius:50%;background:#ffd8a8;position:absolute;left:50%;margin-left:-16px;top:0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .char-torso{width:44px;height:52px;border-radius:20px 20px 24px 24px;position:absolute;left:50%;margin-left:-22px;top:28px;background:linear-gradient(160deg,#6ea6ff,#3a6bd4);transition:background .2s ease}
+  .char-arm{width:11px;height:42px;border-radius:8px;background:#ffd8a8;position:absolute;top:32px;transform-origin:top center}
+  .char-arm.left{left:50%;margin-left:-32px}
+  .char-arm.right{left:50%;margin-left:21px}
+  .char-leg{width:15px;height:46px;border-radius:8px;background:#1c2534;position:absolute;top:76px;transform-origin:bottom center}
+  .char-leg.left{left:50%;margin-left:-16px}
+  .char-leg.right{left:50%;margin-left:1px}
+  .char-torso.move-squat{background:linear-gradient(160deg,#8fbaff,var(--blue))}
+  .char-torso.move-burpee{background:linear-gradient(160deg,#ffab6b,var(--orange))}
+  .char-torso.move-boxjump{background:linear-gradient(160deg,#6be0ac,var(--green))}
+  .char-torso.move-snatch{background:linear-gradient(160deg,#ffd685,var(--gold))}
+  .judge-pop{position:absolute;left:0;right:0;top:14px;text-align:center;font-size:20px;font-weight:900;opacity:0;pointer-events:none;transition:opacity .12s ease, transform .12s ease;transform:translateY(6px)}
   .judge-pop.show{opacity:1;transform:translateY(-6px)}
   .judge-pop.PERFECT{color:var(--gold)} .judge-pop.GREAT{color:var(--green)} .judge-pop.GOOD{color:var(--blue)} .judge-pop.MISS{color:var(--red)}
-  .combo-big{position:absolute;top:14px;left:0;right:0;text-align:center;font-size:15px;font-weight:900;color:#fff;opacity:.85;pointer-events:none}
+  .combo-big{position:absolute;top:46px;left:0;right:0;text-align:center;font-size:14px;font-weight:900;color:#fff;opacity:.85;pointer-events:none}
+  .tap-hint{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:11px;color:var(--muted);pointer-events:none}
+  .stage-flash{position:absolute;inset:0;background:rgba(255,255,255,.12);opacity:0;pointer-events:none;transition:opacity .1s ease}
+  .stage-flash.on{opacity:1}
 
-  .tap-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-  .tap-btn{border-radius:16px;padding:14px 4px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);display:flex;flex-direction:column;align-items:center;gap:2px}
-  .tap-btn .emo{font-size:20px}
-  .tap-btn .nm{font-size:10px;color:var(--muted)}
-  .tap-btn:active,.tap-btn.active{transform:scale(.95)}
-  .tap-btn.lane-0{box-shadow:inset 0 0 0 1px rgba(110,166,255,.4)}
-  .tap-btn.lane-1{box-shadow:inset 0 0 0 1px rgba(255,138,61,.4)}
-  .tap-btn.lane-2{box-shadow:inset 0 0 0 1px rgba(73,213,154,.4)}
-  .tap-btn.lane-3{box-shadow:inset 0 0 0 1px rgba(247,191,79,.4)}
+  .tap-big{width:100%;margin-top:12px;border:none;border-radius:20px;padding:20px;font-weight:900;font-size:16px;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200;letter-spacing:1px}
+  .tap-big:active{transform:scale(.98)}
 
   .play-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
   .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:10px 14px;font-size:12px}
@@ -106,8 +111,6 @@
   .result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .primary{border:none;border-radius:14px;padding:14px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--orange));color:#1c1200}
   .secondary{border:1px solid var(--line);border-radius:14px;padding:14px;font-weight:800;background:rgba(255,255,255,.06);color:var(--text)}
-
-  @media (max-width:360px){.legend{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -124,10 +127,10 @@
   <!-- ===== MENU SCREEN ===== -->
   <section id="screen-menu">
     <div class="panel">
-      <div class="panel-head"><h3>플레이 방법</h3><span class="hint">키보드 / 터치</span></div>
+      <div class="panel-head"><h3>플레이 방법</h3><span class="hint">탭 타이밍</span></div>
       <div class="how">
-        <p>박자에 맞춰 내려오는 동작 노트가 <b>판정선</b>에 닿는 순간, 같은 레인의 키(또는 버튼)를 눌러줘.</p>
-        <p><b>D · F · J · K</b> 키 또는 화면 하단 버튼으로 입력할 수 있어.</p>
+        <p>캐릭터가 박자에 맞춰 동작을 반복해. <b>가장 낮은 자세(바닥)에 닿는 순간</b> 화면을 탭하거나 스페이스바를 눌러줘.</p>
+        <p>WOD는 여러 동작을 이어붙인 구성이라, <b>한 번에 한 동작씩</b> 순서대로 등장해.</p>
       </div>
       <div class="legend" id="legend"></div>
     </div>
@@ -153,12 +156,31 @@
     <div class="hp-row"><span>HP</span><div class="hp-bar"><div id="hpFill"></div></div></div>
     <div class="progress-bar"><div id="progressFill"></div></div>
 
-    <div class="game-stage" id="gameStage">
-      <div class="combo-big hidden" id="comboBig"></div>
-      <div class="judge-pop" id="judgePop"></div>
+    <div class="stage-banner">
+      <div class="move-now"><span class="emo" id="moveEmo">🦵</span><span id="moveName">-</span></div>
+      <div class="rep-count" id="repCount">0/0</div>
     </div>
 
-    <div class="tap-row" id="tapRow"></div>
+    <div class="game-stage" id="gameStage">
+      <div class="stage-flash" id="stageFlash"></div>
+      <div class="combo-big hidden" id="comboBig"></div>
+      <div class="judge-pop" id="judgePop"></div>
+      <div class="floor"></div>
+      <div class="hit-ring" id="hitRing"></div>
+      <div class="char-outer" id="charOuter">
+        <div class="char-upper" id="charUpper">
+          <div class="char-arm left" id="armLeft"></div>
+          <div class="char-arm right" id="armRight"></div>
+          <div class="char-head"></div>
+          <div class="char-torso" id="charTorso"></div>
+        </div>
+        <div class="char-leg left" id="legLeft"></div>
+        <div class="char-leg right" id="legRight"></div>
+      </div>
+      <div class="tap-hint">화면을 탭해도 판정돼</div>
+    </div>
+
+    <button class="tap-big" id="tapBig">TAP · SPACE</button>
 
     <div class="play-footer">
       <button class="ghost" id="pauseBtn">일시정지</button>
@@ -191,37 +213,48 @@
 
 <script>
 /* ============== 데이터 ============== */
-const LANES = [
-  {id:0, key:'D', name:'스쿼트', emoji:'🦵'},
-  {id:1, key:'F', name:'버피',   emoji:'🔥'},
-  {id:2, key:'J', name:'박스점프', emoji:'⬆️'},
-  {id:3, key:'K', name:'스내치', emoji:'🏋️'},
+const MOVES = {
+  squat:   { name:'스쿼트',   emoji:'🦵' },
+  burpee:  { name:'버피',     emoji:'🔥' },
+  boxjump: { name:'박스점프', emoji:'⬆️' },
+  snatch:  { name:'스내치',   emoji:'🏋️' },
+};
+
+const WODS = [
+  {
+    id:'squat-basics', name:'스쿼트 베이직', bpm:100, stars:1,
+    stations:[ {move:'squat', reps:30} ]
+  },
+  {
+    id:'fran-style', name:'프란 스타일 12-9-6', bpm:126, stars:2,
+    stations:[
+      {move:'squat',reps:12}, {move:'burpee',reps:12},
+      {move:'squat',reps:9},  {move:'burpee',reps:9},
+      {move:'squat',reps:6},  {move:'burpee',reps:6},
+    ]
+  },
+  {
+    id:'grace-rush', name:'그레이스 러쉬', bpm:148, stars:3,
+    stations:[
+      {move:'boxjump',reps:12}, {move:'snatch',reps:12},
+      {move:'boxjump',reps:12}, {move:'snatch',reps:12},
+      {move:'boxjump',reps:6},  {move:'snatch',reps:6},
+    ]
+  },
+  {
+    id:'murph-overdrive', name:'머프 오버드라이브', bpm:168, stars:4,
+    stations:[
+      {move:'squat',reps:10}, {move:'burpee',reps:10}, {move:'boxjump',reps:10}, {move:'snatch',reps:10},
+      {move:'squat',reps:7},  {move:'burpee',reps:7},  {move:'boxjump',reps:7},  {move:'snatch',reps:7},
+    ]
+  },
 ];
 
-const SONGS = [
-  {
-    id:'squat-warmup', name:'스쿼트 웜업', bpm:100, stars:1, travel:1.6, target:40,
-    phrase:['1...1...','1...2...','2...1...','1.2.1...']
-  },
-  {
-    id:'burpee-groove', name:'버피 그루브', bpm:126, stars:2, travel:1.45, target:50,
-    phrase:['1.2.1.2.','1.3.1.2.','2.1.2.1.','1.3.2.4.']
-  },
-  {
-    id:'boxjump-rush', name:'박스점프 러쉬', bpm:148, stars:3, travel:1.3, target:55,
-    phrase:['1.23.4.1','2.13.2.4','3.24.1.3','1.34.2.1']
-  },
-  {
-    id:'murph-overdrive', name:'머프 오버드라이브', bpm:168, stars:4, travel:1.2, target:50,
-    phrase:['12341234','1.3.2.4.','13241324','2.4.1.3.']
-  },
-];
+const PERFECT_WINDOW = 0.07;
+const GOOD_WINDOW = 0.18;
+const MISS_WINDOW = 0.22;
 
-const PERFECT_WINDOW = 0.06;
-const GOOD_WINDOW = 0.16;
-const MISS_WINDOW = 0.2;
-
-const META_KEY = 'boxbeat-meta-v1';
+const META_KEY = 'boxbeat-meta-v2';
 function loadMeta(){
   try{ const s = JSON.parse(localStorage.getItem(META_KEY)); if(s) return s; }catch(e){}
   return { totalXp:0, best:{} };
@@ -278,10 +311,10 @@ const Audio = {
   },
   hihat(time){ this.noise(time, 0.05, 0.06, 7000); },
   snare(time){ this.noise(time, 0.12, 0.22, 1800, 'bandpass'); },
-  hitSound(lane, grade){
-    const freqs = [392, 440, 494, 587];
+  hitSound(grade){
     const vol = grade === 'PERFECT' ? .22 : .14;
-    this.tone(this.now(), freqs[lane], grade === 'PERFECT' ? 0.16 : 0.1, 'triangle', vol);
+    const freq = grade === 'PERFECT' ? 587 : 440;
+    this.tone(this.now(), freq, grade === 'PERFECT' ? 0.16 : 0.1, 'triangle', vol);
   },
   missSound(){ this.noise(this.now(), 0.1, 0.12, 300, 'lowpass'); },
 };
@@ -298,140 +331,150 @@ function scheduleBeat(startTime, bpm, durationSec){
   }
 }
 
-/* ============== 채보 생성 ============== */
-function buildChart(song){
-  const eighth = 60/song.bpm/2;
-  const barDur = eighth*8;
-  const bars = Math.max(4, Math.round(song.target/barDur));
-  const notes = [];
-  for(let b=0; b<bars; b++){
-    const row = song.phrase[b % song.phrase.length];
-    const barStart = b*barDur;
-    for(let i=0;i<8;i++){
-      const ch = row[i];
-      if(ch !== '.'){
-        notes.push({ time: barStart + i*eighth, lane: Number(ch)-1, judged:false });
-      }
+/* ============== WOD 채보 생성 ============== */
+function buildChart(wod){
+  const beatDur = 60/wod.bpm;
+  const repDur = beatDur*2;
+  let t = 0;
+  const reps = [];
+  wod.stations.forEach((st, si) => {
+    for(let r=0; r<st.reps; r++){
+      reps.push({
+        move: st.move, station: si, repIndexInStation: r, stationReps: st.reps,
+        repStart: t, repDur, time: t + repDur*0.5, judged:false,
+      });
+      t += repDur;
     }
+  });
+  return { reps, duration: t };
+}
+
+/* ============== 캐릭터 포즈 ============== */
+function poseFor(move, progress){
+  const p = Math.min(Math.max(progress, 0), 1);
+  const depth = Math.sin(p*Math.PI);
+  let legScale, torsoY, rot=0, armAngle=0, armY=0, hop=0;
+  if(move === 'burpee'){
+    legScale = 1 - depth*0.30;
+    torsoY = (1-legScale)*46 + depth*14;
+    rot = depth*24;
+    armAngle = -depth*110;
+    armY = depth*8;
+  } else if(move === 'boxjump'){
+    legScale = 1 - depth*0.30;
+    hop = p > 0.55 ? Math.sin(Math.min((p-0.55)/0.45,1)*Math.PI) : 0;
+    torsoY = (1-legScale)*46;
+    armAngle = -depth*60 + hop*50;
+    armY = -hop*6;
+  } else if(move === 'snatch'){
+    legScale = 1 - depth*0.32;
+    const extend = p > 0.6 ? Math.sin(Math.min((p-0.6)/0.4,1)*Math.PI) : 0;
+    torsoY = (1-legScale)*46 - extend*8;
+    rot = depth*12 - extend*8;
+    armAngle = -depth*35 - extend*140;
+    armY = -extend*16;
+  } else {
+    legScale = 1 - depth*0.34;
+    torsoY = (1-legScale)*46;
+    armAngle = -depth*55;
   }
-  return { notes, duration: bars*barDur };
+  return { depth, legScale, torsoY, rot, armAngle, armY, hop };
+}
+
+function applyPose(pose){
+  document.getElementById('charOuter').style.transform = `translateY(${-(pose.hop||0)*30}px)`;
+  document.getElementById('charUpper').style.transform = `translateY(${pose.torsoY}px) rotate(${pose.rot}deg)`;
+  document.getElementById('legLeft').style.transform = `scaleY(${pose.legScale})`;
+  document.getElementById('legRight').style.transform = `scaleY(${pose.legScale})`;
+  document.getElementById('armLeft').style.transform = `translateY(${pose.torsoY + (pose.armY||0)}px) rotate(${pose.armAngle}deg)`;
+  document.getElementById('armRight').style.transform = `translateY(${pose.torsoY + (pose.armY||0)}px) rotate(${-pose.armAngle}deg)`;
+  const ring = document.getElementById('hitRing');
+  ring.style.opacity = 0.15 + pose.depth*0.65;
+  ring.style.transform = `scale(${1 + pose.depth*0.5})`;
 }
 
 /* ============== 상태 ============== */
 let game = null;
 let rafId = null;
 
-function startSong(song){
+function startSong(wod){
   Audio.init();
-  const chart = buildChart(song);
+  const chart = buildChart(wod);
   const startTime = Audio.now() + 0.6;
-  scheduleBeat(startTime, song.bpm, chart.duration);
+  scheduleBeat(startTime, wod.bpm, chart.duration);
 
   game = {
-    song, chart, startTime,
-    travel: song.travel,
-    activeNotes: [],
-    nextIndex: 0,
+    wod, chart, startTime,
+    nextIndex:0,
+    curStation:-1, curStationReps:0,
     score:0, combo:0, maxCombo:0, hp:100,
     counts:{PERFECT:0, GOOD:0, MISS:0},
     finished:false, failed:false, paused:false,
+    allDoneAt:null,
   };
 
-  document.getElementById('playSongName').textContent = song.name;
-  document.getElementById('playSongMeta').textContent = `BPM ${song.bpm} · ${'★'.repeat(song.stars)}${'☆'.repeat(4-song.stars)}`;
-  document.getElementById('gameStage').innerHTML = `
-    <div class="combo-big hidden" id="comboBig"></div>
-    <div class="judge-pop" id="judgePop"></div>
-    ${LANES.map(l => `
-      <div class="lane lane-${l.id}" data-lane="${l.id}">
-        <div class="hit-line"></div>
-        <div class="receptor" id="receptor-${l.id}">${l.emoji}</div>
-      </div>`).join('')}
-  `;
-  document.getElementById('tapRow').innerHTML = LANES.map(l => `
-    <button class="tap-btn lane-${l.id}" data-lane="${l.id}">
-      <span class="emo">${l.emoji}</span>
-      <span class="nm">${l.name}</span>
-      <span class="nm">[${l.key}]</span>
-    </button>`).join('');
-  document.querySelectorAll('.tap-btn').forEach(btn => {
-    const lane = Number(btn.dataset.lane);
-    const fire = ev => { ev.preventDefault(); attemptHit(lane); btn.classList.add('active'); setTimeout(()=>btn.classList.remove('active'),100); };
-    btn.addEventListener('pointerdown', fire);
-  });
-
+  document.getElementById('playSongName').textContent = wod.name;
+  document.getElementById('playSongMeta').textContent = `BPM ${wod.bpm} · ${'★'.repeat(wod.stars)}${'☆'.repeat(4-wod.stars)}`;
+  document.getElementById('charTorso').className = 'char-torso';
   updateHud();
+  updateMoveBanner(game.chart.reps[0] ? game.chart.reps[0].move : 'squat', 0, game.chart.reps[0] ? game.chart.reps[0].stationReps : 0);
   showScreen('play');
   loop();
 }
 
 function loop(){
   rafId = requestAnimationFrame(loop);
-  if(!game || game.paused || game.finished) return;
+  if(!game || game.finished) return;
+  if(game.paused){ return; }
   const elapsed = Audio.now() - game.startTime;
 
-  while(game.nextIndex < game.chart.notes.length && game.chart.notes[game.nextIndex].time - game.travel <= elapsed){
-    spawnNote(game.chart.notes[game.nextIndex]);
+  while(game.nextIndex < game.chart.reps.length && elapsed - game.chart.reps[game.nextIndex].time > MISS_WINDOW){
+    judgeRep(game.chart.reps[game.nextIndex], 'MISS');
     game.nextIndex++;
   }
 
-  const stageEl = document.getElementById('gameStage');
-  const hitLineY = stageEl.clientHeight - 66;
-
-  for(let i = game.activeNotes.length-1; i>=0; i--){
-    const n = game.activeNotes[i];
-    const progress = (elapsed - n.spawnTime) / game.travel;
-    if(!n.judged){
-      n.el.style.top = `${Math.min(progress,1.25)*hitLineY - 20}px`;
-      if(elapsed - n.time > MISS_WINDOW){
-        judgeNote(n, 'MISS');
-      }
+  const rep = game.chart.reps[game.nextIndex];
+  if(rep){
+    const progress = (elapsed - rep.repStart) / rep.repDur;
+    applyPose(poseFor(rep.move, progress));
+    if(game.curStation !== rep.station){
+      updateMoveBanner(rep.move, rep.repIndexInStation, rep.stationReps);
+    } else {
+      document.getElementById('repCount').textContent = `${rep.repIndexInStation+1}/${rep.stationReps}`;
     }
-    if(n.removeAt && elapsed > n.removeAt){
-      n.el.remove();
-      game.activeNotes.splice(i,1);
-    }
+  } else {
+    applyPose(poseFor('squat', 0));
   }
 
   document.getElementById('progressFill').style.width = `${Math.min(100, elapsed/game.chart.duration*100)}%`;
 
-  if(elapsed > game.chart.duration + game.travel + 0.3 && !game.finished){
-    finishSong();
+  if(game.nextIndex >= game.chart.reps.length){
+    if(game.allDoneAt === null) game.allDoneAt = elapsed;
+    if(elapsed - game.allDoneAt > 0.5) finishSong();
   }
 }
 
-function spawnNote(noteDef){
-  const stageEl = document.getElementById('gameStage');
-  const laneEl = stageEl.querySelector(`.lane[data-lane="${noteDef.lane}"]`);
-  const el = document.createElement('div');
-  el.className = `note lane-${noteDef.lane}`;
-  el.textContent = LANES[noteDef.lane].emoji;
-  laneEl.appendChild(el);
-  const active = { ...noteDef, el, spawnTime: noteDef.time - game.travel, removeAt:null };
-  game.activeNotes.push(active);
-}
-
-function attemptHit(lane){
+function attemptHit(){
   if(!game || game.finished || game.paused) return;
+  flashStage();
   const elapsed = Audio.now() - game.startTime;
-  let best=null, bestDiff=Infinity;
-  for(const n of game.activeNotes){
-    if(n.lane !== lane || n.judged) continue;
-    const diff = Math.abs(n.time - elapsed);
-    if(diff < bestDiff){ bestDiff = diff; best = n; }
-  }
-  flashLane(lane);
-  if(best && bestDiff <= GOOD_WINDOW){
-    const grade = bestDiff <= PERFECT_WINDOW ? 'PERFECT' : 'GOOD';
-    judgeNote(best, grade);
+  const rep = game.chart.reps[game.nextIndex];
+  if(!rep) return;
+  const diff = Math.abs(rep.time - elapsed);
+  if(diff <= GOOD_WINDOW){
+    const grade = diff <= PERFECT_WINDOW ? 'PERFECT' : 'GOOD';
+    judgeRep(rep, grade);
+    game.nextIndex++;
   }
 }
 
-function judgeNote(note, grade){
-  note.judged = true;
-  note.removeAt = (Audio.now() - game.startTime) + 0.12;
-  note.el.style.opacity = '0';
-  note.el.style.transition = 'opacity .12s ease';
+function judgeRep(rep, grade){
+  rep.judged = true;
+  if(game.curStation !== rep.station){
+    game.curStation = rep.station;
+    game.curStationReps = 0;
+  }
+  game.curStationReps++;
 
   game.counts[grade] = (game.counts[grade]||0) + 1;
   if(grade === 'MISS'){
@@ -444,29 +487,30 @@ function judgeNote(note, grade){
     game.hp = Math.min(100, game.hp + (grade==='PERFECT' ? 1 : 0));
     const base = grade === 'PERFECT' ? 300 : 100;
     game.score += base + game.combo*2;
-    Audio.hitSound(note.lane, grade);
-    pulseReceptor(note.lane);
+    Audio.hitSound(grade);
   }
   showJudgePop(grade);
   updateHud();
+  document.getElementById('repCount').textContent = `${game.curStationReps}/${rep.stationReps}`;
   if(game.hp <= 0) failSong();
 }
 
-function flashLane(lane){
-  const laneEl = document.querySelector(`.lane[data-lane="${lane}"]`);
-  if(!laneEl) return;
-  laneEl.classList.add('flash');
-  setTimeout(()=>laneEl.classList.remove('flash'), 100);
+function flashStage(){
+  const el = document.getElementById('stageFlash');
+  el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'), 90);
 }
-function pulseReceptor(lane){
-  const r = document.getElementById(`receptor-${lane}`);
-  if(!r) return;
-  r.classList.add('hit');
-  setTimeout(()=>r.classList.remove('hit'), 90);
+
+function updateMoveBanner(move, repIndexInStation, stationReps){
+  const def = MOVES[move];
+  document.getElementById('moveEmo').textContent = def.emoji;
+  document.getElementById('moveName').textContent = def.name;
+  document.getElementById('repCount').textContent = `${repIndexInStation+1}/${stationReps}`;
+  document.getElementById('charTorso').className = `char-torso move-${move}`;
 }
+
 function showJudgePop(grade){
   const el = document.getElementById('judgePop');
-  if(!el) return;
   el.textContent = grade;
   el.className = `judge-pop show ${grade}`;
   clearTimeout(showJudgePop._t);
@@ -512,7 +556,7 @@ function finishSong(){
 
   const xpGained = Math.max(10, Math.round(game.score/50));
   meta.totalXp += xpGained;
-  const key = game.song.id;
+  const key = game.wod.id;
   const prevBest = meta.best[key];
   if(!prevBest || game.score > prevBest.score){
     meta.best[key] = { score:game.score, rank };
@@ -521,8 +565,8 @@ function finishSong(){
 
   document.getElementById('resultRank').textContent = rank;
   document.getElementById('resultSub').textContent = game.failed
-    ? `${game.song.name} · 실패 (HP 소진)`
-    : `${game.song.name} · 정확도 ${acc.toFixed(1)}%`;
+    ? `${game.wod.name} · 실패 (HP 소진)`
+    : `${game.wod.name} · 정확도 ${acc.toFixed(1)}%`;
   document.getElementById('resultScore').textContent = game.score;
   document.getElementById('resultCombo').textContent = game.maxCombo;
   document.getElementById('resultXp').textContent = `+${xpGained} XP`;
@@ -548,47 +592,48 @@ function renderLevelChip(){
 }
 
 function renderLegend(){
-  document.getElementById('legend').innerHTML = LANES.map(l => `
+  document.getElementById('legend').innerHTML = Object.values(MOVES).map(m => `
     <div class="legend-item">
-      <div class="emo">${l.emoji}</div>
-      <div class="nm">${l.name}</div>
-      <div class="ky lane-${l.id}" style="background:rgba(255,255,255,.08)">${l.key}</div>
+      <div class="emo">${m.emoji}</div>
+      <div class="nm">${m.name}</div>
     </div>`).join('');
 }
 
 function renderSongList(){
-  document.getElementById('songList').innerHTML = SONGS.map(s => {
-    const best = meta.best[s.id];
+  document.getElementById('songList').innerHTML = WODS.map(w => {
+    const best = meta.best[w.id];
+    const totalReps = w.stations.reduce((a,s)=>a+s.reps,0);
+    const moveNames = [...new Set(w.stations.map(s=>MOVES[s.move].name))].join(' · ');
     return `
     <div class="song-card">
       <div class="song-info">
-        <strong>${s.name}</strong>
-        <p>BPM ${s.bpm} · ${Math.round(s.target)}초</p>
-        <div class="stars">${'★'.repeat(s.stars)}${'☆'.repeat(4-s.stars)}</div>
+        <strong>${w.name}</strong>
+        <p>BPM ${w.bpm} · 총 ${totalReps}회 · ${moveNames}</p>
+        <div class="stars">${'★'.repeat(w.stars)}${'☆'.repeat(4-w.stars)}</div>
         ${best ? `<div class="best">BEST ${best.score} · RANK ${best.rank}</div>` : ''}
       </div>
-      <button class="play-btn" data-song="${s.id}">PLAY</button>
+      <button class="play-btn" data-song="${w.id}">PLAY</button>
     </div>`;
   }).join('');
   document.querySelectorAll('[data-song]').forEach(btn => {
     btn.onclick = () => {
-      const song = SONGS.find(s => s.id === btn.dataset.song);
-      startSong(song);
+      const wod = WODS.find(w => w.id === btn.dataset.song);
+      startSong(wod);
     };
   });
 }
 
 /* ============== 이벤트 ============== */
-const KEY_TO_LANE = {};
-LANES.forEach(l => KEY_TO_LANE[l.key.toLowerCase()] = l.id);
-
 document.addEventListener('keydown', e => {
   if(e.repeat) return;
-  const lane = KEY_TO_LANE[e.key.toLowerCase()];
-  if(lane === undefined) return;
+  if(e.key !== ' ' && e.key !== 'Enter') return;
   if(document.getElementById('screen-play').classList.contains('hidden')) return;
-  attemptHit(lane);
+  e.preventDefault();
+  attemptHit();
 });
+
+document.getElementById('gameStage').addEventListener('pointerdown', () => attemptHit());
+document.getElementById('tapBig').addEventListener('pointerdown', e => { e.preventDefault(); attemptHit(); });
 
 document.getElementById('pauseBtn').addEventListener('click', () => {
   if(!game || game.finished) return;
@@ -606,8 +651,8 @@ document.getElementById('exitBtn').addEventListener('click', () => {
 });
 
 document.getElementById('retryBtn').addEventListener('click', () => {
-  const song = game ? game.song : SONGS[0];
-  startSong(song);
+  const wod = game ? game.wod : WODS[0];
+  startSong(wod);
 });
 document.getElementById('menuBtn').addEventListener('click', () => {
   renderSongList();
